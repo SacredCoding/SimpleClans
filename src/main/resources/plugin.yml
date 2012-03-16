@@ -1,6 +1,6 @@
-name: SimpleClans
+name: ${project.name}
 main: net.sacredlabyrinth.phaed.simpleclans.SimpleClans
-version: 2.2.1
+version: ${project.version}
 softdepend: [Spout, Permissions, PermissionsBukkit, Vault, PermissionsEx, PreciousStones, mChat, mChatSuite]
 permissions:
   simpleclans.admin.reload:
