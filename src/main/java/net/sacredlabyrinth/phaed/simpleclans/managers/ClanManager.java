@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.util.*;
 import net.sacredlabyrinth.phaed.simpleclans.*;
+import net.sacredlabyrinth.phaed.simpleclans.api.events.SimpleClansClanCreateEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -82,7 +83,11 @@ public final class ClanManager
 
         plugin.getPermissionsManager().updateClanPermissions(clan);
 
-        plugin.getSpoutPluginManager().processPlayer(player.getName());
+        plugin.getServer().getPluginManager().callEvent(new SimpleClansClanCreateEvent(cp, clan));
+
+        if (plugin.hasSpout()) {
+            plugin.getSpoutPluginManager().processPlayer(player.getName());
+        }
     }
 
     /**
@@ -419,13 +424,12 @@ public final class ClanManager
         ClanPlayer cp = getAnyClanPlayer(player.getName());
 
         if (cp != null) {
-            cp.updateLastSeen();
+
             plugin.getStorageManager().updateClanPlayer(cp);
 
             Clan clan = cp.getClan();
 
             if (clan != null) {
-                clan.updateLastUsed();
                 plugin.getStorageManager().updateClan(clan);
             }
         }
@@ -977,7 +981,59 @@ public final class ClanManager
 
         return true;
     }
+    /**
+     * Purchase Rally-point Teleport
+     *
+     * @param player
+     * @return
+     */
+    public boolean purchaseRallyPointTeleport(Player player)
+    {
+        if (!plugin.getSettingsManager().isRallyTeleportPurchase()) {
+            return true;
+        }
 
+        double price = plugin.getSettingsManager().getRallyTeleportPrice();
+
+        if (plugin.getPermissionsManager().hasEconomy()) {
+            if (plugin.getPermissionsManager().playerHasMoney(player, price)) {
+                plugin.getPermissionsManager().playerChargeMoney(player, price);
+                player.sendMessage(ChatColor.RED + MessageFormat.format(plugin.getLang("account.has.been.debited"), price));
+            } else {
+                player.sendMessage(ChatColor.RED + plugin.getLang("not.sufficient.money"));
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Purchase Rally-point Teleport Set
+     *
+     * @param player
+     * @return
+     */
+    public boolean purchaseRallyPointTeleportSet(Player player)
+    {
+        if (!plugin.getSettingsManager().isRallyTeleportSetPurchase()) {
+            return true;
+        }
+
+        double price = plugin.getSettingsManager().getRallyTeleportSetPrice();
+
+        if (plugin.getPermissionsManager().hasEconomy()) {
+            if (plugin.getPermissionsManager().playerHasMoney(player, price)) {
+                plugin.getPermissionsManager().playerChargeMoney(player, price);
+                player.sendMessage(ChatColor.RED + MessageFormat.format(plugin.getLang("account.has.been.debited"), price));
+            } else {
+                player.sendMessage(ChatColor.RED + plugin.getLang("not.sufficient.money"));
+                return false;
+            }
+        }
+
+        return true;
+    }
     /**
      * Purchase Home Teleport
      *
@@ -1123,8 +1179,8 @@ public final class ClanManager
                 tag = plugin.getSettingsManager().getClanChatBracketColor() + plugin.getSettingsManager().getClanChatTagBracketLeft() + plugin.getSettingsManager().getTagDefaultColor() + cp.getClan().getColorTag() + plugin.getSettingsManager().getClanChatBracketColor() + plugin.getSettingsManager().getClanChatTagBracketRight() + " ";
             }
 
-            String message = code + Helper.parseColors(tag) + plugin.getSettingsManager().getClanChatNameColor() + plugin.getSettingsManager().getClanChatPlayerBracketLeft() + player.getName() + plugin.getSettingsManager().getClanChatPlayerBracketRight() + " " + plugin.getSettingsManager().getClanChatMessageColor() + msg;
-            String eyeMessage = code + plugin.getSettingsManager().getClanChatBracketColor() + plugin.getSettingsManager().getClanChatTagBracketLeft() + plugin.getSettingsManager().getTagDefaultColor() + cp.getClan().getColorTag() + plugin.getSettingsManager().getClanChatBracketColor() + plugin.getSettingsManager().getClanChatTagBracketRight() + " " + plugin.getSettingsManager().getClanChatNameColor() + plugin.getSettingsManager().getClanChatPlayerBracketLeft() + player.getName() + plugin.getSettingsManager().getClanChatPlayerBracketRight() + " " + plugin.getSettingsManager().getClanChatMessageColor() + msg;
+            String message = code + Helper.parseColors(tag) + plugin.getSettingsManager().getClanChatNameColor() + plugin.getSettingsManager().getClanChatPlayerBracketLeft() + player.getDisplayName() + plugin.getSettingsManager().getClanChatPlayerBracketRight() + " " + plugin.getSettingsManager().getClanChatMessageColor() + msg;
+            String eyeMessage = code + plugin.getSettingsManager().getClanChatBracketColor() + plugin.getSettingsManager().getClanChatTagBracketLeft() + plugin.getSettingsManager().getTagDefaultColor() + cp.getClan().getColorTag() + plugin.getSettingsManager().getClanChatBracketColor() + plugin.getSettingsManager().getClanChatTagBracketRight() + " " + plugin.getSettingsManager().getClanChatNameColor() + plugin.getSettingsManager().getClanChatPlayerBracketLeft() + player.getDisplayName() + plugin.getSettingsManager().getClanChatPlayerBracketRight() + " " + plugin.getSettingsManager().getClanChatMessageColor() + msg;
 
             plugin.getServer().getConsoleSender().sendMessage(eyeMessage);
 
@@ -1146,7 +1202,7 @@ public final class ClanManager
 
         for (Player player : players) {
             if (plugin.getPermissionsManager().has(player, "simpleclans.admin.all-seeing-eye")) {
-                if (plugin.getClanManager().getAnyClanPlayer(player.getName()) != null && plugin.getClanManager().getAnyClanPlayer(player.getName()).isAllSeeingEyeEnabled()) {
+                if (plugin.getClanManager().getAnyClanPlayer(player.getName()) != null) {
                     boolean alreadySent = false;
 
                     for (ClanPlayer cpp : cps) {
@@ -1202,7 +1258,7 @@ public final class ClanManager
             ChatBlock.sendMessage(player, ChatColor.AQUA + "You have left ally chat");
         } else {
             String code = "" + ChatColor.AQUA + ChatColor.WHITE + ChatColor.AQUA + ChatColor.BLACK;
-            String message = code + plugin.getSettingsManager().getAllyChatBracketColor() + plugin.getSettingsManager().getAllyChatTagBracketLeft() + plugin.getSettingsManager().getAllyChatTagColor() + plugin.getSettingsManager().getCommandAlly() + plugin.getSettingsManager().getAllyChatBracketColor() + plugin.getSettingsManager().getAllyChatTagBracketRight() + " " + plugin.getSettingsManager().getAllyChatNameColor() + plugin.getSettingsManager().getAllyChatPlayerBracketLeft() + player.getName() + plugin.getSettingsManager().getAllyChatPlayerBracketRight() + " " + plugin.getSettingsManager().getAllyChatMessageColor() + msg;
+            String message = code + plugin.getSettingsManager().getAllyChatBracketColor() + plugin.getSettingsManager().getAllyChatTagBracketLeft() + plugin.getSettingsManager().getAllyChatTagColor() + plugin.getSettingsManager().getCommandAlly() + plugin.getSettingsManager().getAllyChatBracketColor() + plugin.getSettingsManager().getAllyChatTagBracketRight() + " " + plugin.getSettingsManager().getAllyChatNameColor() + plugin.getSettingsManager().getAllyChatPlayerBracketLeft() + player.getDisplayName() + plugin.getSettingsManager().getAllyChatPlayerBracketRight() + " " + plugin.getSettingsManager().getAllyChatMessageColor() + msg;
             SimpleClans.log(message);
 
             Player self = plugin.getServer().getPlayer(player.getName());

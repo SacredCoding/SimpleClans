@@ -1,38 +1,49 @@
 package net.sacredlabyrinth.phaed.simpleclans.commands;
 
+import java.text.MessageFormat;
 import net.sacredlabyrinth.phaed.simpleclans.ChatBlock;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
-import net.sacredlabyrinth.phaed.simpleclans.Helper;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
+import net.sacredlabyrinth.phaed.simpleclans.results.BankResult;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.text.MessageFormat;
-import java.util.HashSet;
-import net.sacredlabyrinth.phaed.simpleclans.*;
 
 /**
  *
  * @author phaed
  */
-public class BankCommand
+public class BankCommand extends GenericPlayerCommand
 {
 
-    public BankCommand()
+    private SimpleClans plugin;
+
+    public BankCommand(SimpleClans plugin)
     {
+        super("Bank");
+        this.plugin = plugin;
+        setArgumentRange(1, 2);
+        setUsages(MessageFormat.format(plugin.getLang("usage.bank"), plugin.getSettingsManager().getCommandClan()));
+        setIdentifiers(plugin.getLang("bank.command"));
     }
 
-    /**
-     * Execute the command
-     *
-     * @param player
-     * @param arg
-     */
-    public void execute(Player player, String[] arg)
+    @Override
+    public String getMenu(ClanPlayer cp, CommandSender sender)
     {
-        SimpleClans plugin = SimpleClans.getInstance();
+        if (cp != null) {
+            if (cp.isTrusted() && cp.getClan().isVerified()) {
+                if (plugin.getPermissionsManager().has(sender, "simpleclans.member.bank")) {
+                    return MessageFormat.format(plugin.getLang("bank.withdraw.deposit.status"), plugin.getSettingsManager().getCommandClan(), ChatColor.WHITE);
+                }
+            }
+        }
+        return null;
+    }
 
+    @Override
+    public void execute(Player player, String label, String[] args)
+    {
         if (plugin.getPermissionsManager().has(player, "simpleclans.member.bank")) {
             ClanPlayer cp = plugin.getClanManager().getClanPlayer(player);
             double plmoney = plugin.getPermissionsManager().playerGetMoney(player);
@@ -45,38 +56,38 @@ public class BankCommand
                 if (clan.isMember(player)) {
                     if (clan.isVerified()) {
                         if (cp.isTrusted()) {
-                            if (arg.length == 1) {
-                                if (arg[0].equalsIgnoreCase("status")) {
+                            if (args.length == 1) {
+                                if (args[0].equalsIgnoreCase("status")) {
                                     player.sendMessage(ChatColor.AQUA + MessageFormat.format("Clan-Balance: {0}", clanbalance));
                                 }
-                            } else if (arg.length == 2) {
-                                if (arg[1].matches("[0-9]+")) {
-                                    money = Double.parseDouble(arg[1]);
+                            } else if (args.length == 2) {
+                                if (args[1].matches("[0-9]+")) {
+                                    money = Double.parseDouble(args[1]);
                                 }
 
                                 BankResult result = null;
                                 double amount = 0;
 
-                                if (arg[0].equalsIgnoreCase("deposit")) {
+                                if (args[0].equalsIgnoreCase("deposit")) {
                                     if (cp.getClan().isLeader(player) || clan.isAllowDeposit()) {
-                                        if (arg[1].equalsIgnoreCase("all")) {
+                                        if (args[1].equalsIgnoreCase("all")) {
                                             amount = plmoney;
-                                            result = clan.deposit(plmoney, player);
+                                            result = clan.deposit(plmoney, cp);
                                         } else {
                                             amount = money;
-                                            result = clan.deposit(money, player);
+                                            result = clan.deposit(money, cp);
                                         }
                                     } else {
                                         ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
                                     }
-                                } else if (arg[0].equalsIgnoreCase("withdraw")) {
+                                } else if (args[0].equalsIgnoreCase("withdraw")) {
                                     if (cp.getClan().isLeader(player) || clan.isAllowWithdraw()) {
-                                        if (arg[1].equalsIgnoreCase("all")) {
+                                        if (args[1].equalsIgnoreCase("all")) {
                                             amount = clanbalance;
-                                            result = clan.withdraw(clanbalance, player);
+                                            result = clan.withdraw(clanbalance, cp);
                                         } else {
                                             amount = money;
-                                            result = clan.withdraw(money, player);
+                                            result = clan.withdraw(money, cp);
                                         }
                                     } else {
                                         ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
@@ -106,12 +117,8 @@ public class BankCommand
                                             player.sendMessage(ChatColor.DARK_RED + plugin.getLang("transaction.failed"));
                                             break;
                                     }
-
                                 }
-                            } else {
-                                ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.bank"), plugin.getSettingsManager().getCommandClan()));
                             }
-
                         } else {
                             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("only.trusted.players.can.access.clan.stats"));
                         }

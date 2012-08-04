@@ -2,19 +2,23 @@ package net.sacredlabyrinth.phaed.simpleclans.managers;
 
 import in.mDev.MiracleM4n.mChatSuite.api.API;
 import in.mDev.MiracleM4n.mChatSuite.mChatSuite;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import net.sacredlabyrinth.Phaed.PreciousStones.FieldFlag;
 import net.sacredlabyrinth.Phaed.PreciousStones.PreciousStones;
+import net.sacredlabyrinth.Phaed.PreciousStones.ResultsFilter;
+import net.sacredlabyrinth.Phaed.PreciousStones.vectors.ChunkVec;
 import net.sacredlabyrinth.Phaed.PreciousStones.vectors.Field;
+import net.sacredlabyrinth.phaed.simpleclans.ChunkLocation;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.bukkit.Location;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -135,7 +139,7 @@ public final class PermissionsManager
                             cp.addPermission(perm);
                         }
                     } else if (!cp.isTrusted()) {
-                        
+
                         Set<String> defaultUnTrustedPermissions = plugin.getSettingsManager().getDefaultUnTrustedPermissions(tag);
 
                         for (String perm : defaultUnTrustedPermissions) {
@@ -260,6 +264,26 @@ public final class PermissionsManager
     }
 
     /**
+     * Check if a commandsender has permissions
+     *
+     * @param player the player
+     * @param perm the permission
+     * @return whether he has the permission
+     */
+    public boolean has(CommandSender sender, String perm)
+    {
+        if (sender == null) {
+            return false;
+        }
+
+        if (permission != null) {
+            return permission.has(sender, perm);
+        } else {
+            return sender.hasPermission(perm);
+        }
+    }
+
+    /**
      * Sets the mChat clan tag
      *
      * @param player
@@ -288,81 +312,19 @@ public final class PermissionsManager
         }
     }
 
-    /**
-     * Gives the player permissions linked to a clan
-     *
-     * @param cp
-     */
-    public void addClanPermissions(ClanPlayer cp)
+    public boolean isAreaAlreadyProtected(ChunkLocation chunk)
     {
-        if (!plugin.getSettingsManager().isEnableAutoGroups()) {
-            return;
-        }
-
-        if (permission != null) {
-            if (cp != null && cp.toPlayer() != null) {
-                if (cp.getClan() != null) {
-                    if (!permission.playerInGroup(cp.toPlayer(), "Clan" + cp.getTag())) {
-                        permission.playerAddGroup(cp.toPlayer(), "Clan" + cp.getTag());
-                    }
-
-                    if (cp.isLeader()) {
-                        if (!permission.playerInGroup(cp.toPlayer(), "SCLeader")) {
-                            permission.playerAddGroup(cp.toPlayer(), "SCLeader");
-                        }
-                        permission.playerRemoveGroup(cp.toPlayer(), "SCUntrusted");
-                        permission.playerRemoveGroup(cp.toPlayer(), "SCTrusted");
-                        return;
-                    }
-
-                    if (cp.isTrusted()) {
-                        if (!permission.playerInGroup(cp.toPlayer(), "SCTrusted")) {
-                            permission.playerAddGroup(cp.toPlayer(), "SCTrusted");
-                        }
-                        permission.playerRemoveGroup(cp.toPlayer(), "SCUntrusted");
-                        permission.playerRemoveGroup(cp.toPlayer(), "SCLeader");
-                        return;
-                    }
-
-                    if (!cp.isTrusted() && !cp.isLeader()) {
-                        if (!permission.playerInGroup(cp.toPlayer(), "SCUntrusted")) {
-                            permission.playerAddGroup(cp.toPlayer(), "SCUntrusted");
-                        }
-                        permission.playerRemoveGroup(cp.toPlayer(), "SCTrusted");
-                        permission.playerRemoveGroup(cp.toPlayer(), "SCLeader");
-                    }
-                } else {
-                    permission.playerRemoveGroup(cp.toPlayer(), "SCUntrusted");
-                    permission.playerRemoveGroup(cp.toPlayer(), "SCTrusted");
-                    permission.playerRemoveGroup(cp.toPlayer(), "SCLeader");
+        if (ps != null) {
+            List<Field> fields = ps.getForceFieldManager().getSourceFieldsInChunk(new ChunkVec(chunk.getNormalX(), chunk.getNormalZ(), chunk.getWorld()), FieldFlag.ALL, new ResultsFilter[0]);
+            if (fields != null) {
+                if (!fields.isEmpty()) {
+                    return true;
                 }
             } else {
-                permission.playerRemoveGroup(cp.toPlayer(), "SCUntrusted");
-                permission.playerRemoveGroup(cp.toPlayer(), "SCTrusted");
-                permission.playerRemoveGroup(cp.toPlayer(), "SCLeader");
+                return true;
             }
         }
-    }
-
-    /**
-     * Removes permissions linked to a clan from the player
-     *
-     * @param cp
-     */
-    public void removeClanPermissions(ClanPlayer cp)
-    {
-        if (!plugin.getSettingsManager().isEnableAutoGroups()) {
-            return;
-        }
-
-        if (permission != null) {
-            if (cp.toPlayer() != null) {
-                permission.playerRemoveGroup(cp.toPlayer(), "Clan" + cp.getTag());
-                permission.playerRemoveGroup(cp.toPlayer(), "SCUntrusted");
-                permission.playerRemoveGroup(cp.toPlayer(), "SCTrusted");
-                permission.playerRemoveGroup(cp.toPlayer(), "SCLeader");
-            }
-        }
+        return false;
     }
 
     /**
@@ -375,13 +337,15 @@ public final class PermissionsManager
     public boolean teleportAllowed(Player player, Location location)
     {
         if (ps != null) {
-            Field field = ps.getForceFieldManager().getSourceField(location, FieldFlag.PREVENT_TELEPORT);
+            List<Field> fields = ps.getForceFieldManager().getSourceFields(location, FieldFlag.PREVENT_TELEPORT);
 
-            if (field != null) {
-                boolean allowed = ps.getForceFieldManager().isApplyToAllowed(field, player.getName());
+            if (fields != null && !fields.isEmpty()) {
+                for (Field field : fields) {
+                    boolean allowed = ps.getForceFieldManager().isApplyToAllowed(field, player.getName());
 
-                if (!allowed || field.hasFlag(FieldFlag.APPLY_TO_ALL)) {
-                    return false;
+                    if (!allowed || field.hasFlag(FieldFlag.APPLY_TO_ALL)) {
+                        return false;
+                    }
                 }
             }
         }
@@ -403,6 +367,13 @@ public final class PermissionsManager
         Plugin test = plugin.getServer().getPluginManager().getPlugin("mChatSuite");
 
         if (test != null) {
+            try {
+                int build = Integer.parseInt(test.getDescription().getVersion().substring(7, 10));
+                if (build < 262) {
+                    SimpleClans.debug(Level.WARNING, "Please update mChatSuite to support the integration with it!");
+                }
+            } catch (Exception ex) {
+            }
             mchat = (mChatSuite) test;
         }
     }
@@ -480,22 +451,22 @@ public final class PermissionsManager
         }
 
         if (permission != null && chat != null) {
-            try {
-                String world = p.getWorld().getName();
-                String name = p.getName();
-                String suffix = chat.getPlayerSuffix(world, name);
-                if (suffix == null || suffix.isEmpty()) {
-                    String group = permission.getPrimaryGroup(world, name);
-                    suffix = chat.getPlayerSuffix(world, group);
-                    if (suffix == null) {
-                        suffix = "";
-                    }
+//            try {
+            String world = p.getWorld().getName();
+            String name = p.getName();
+            String suffix = chat.getPlayerSuffix(world, name);
+            if (suffix == null || suffix.isEmpty()) {
+                String group = permission.getPrimaryGroup(world, name);
+                suffix = chat.getPlayerSuffix(world, group);
+                if (suffix == null) {
+                    suffix = "";
                 }
-                return suffix.replace("&", "\u00a7").replace(String.valueOf((char) 194), "");
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                return "";
             }
+            return suffix.replace("&", "\u00a7").replace(String.valueOf((char) 194), "");
+//            } catch (Exception e) {
+//                System.out.println(e.getMessage());
+//                return "";
+//            }
         }
         return "";
     }

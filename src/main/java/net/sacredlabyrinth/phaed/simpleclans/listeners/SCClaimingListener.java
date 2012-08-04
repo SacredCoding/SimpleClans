@@ -16,6 +16,7 @@ import net.sacredlabyrinth.phaed.simpleclans.PermissionType;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,7 +26,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.getspout.spoutapi.SpoutManager;
-import org.getspout.spoutapi.event.spout.SpoutCraftEnableEvent;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
 /**
@@ -73,51 +73,58 @@ public class SCClaimingListener implements Listener
 //        long startns = System.nanoTime();
         Clan clanHere = plugin.getClanManager().getClanAt(loc);
 
-        if (clanHere != null) {
-
-            if (clan != null) {
-
-                if (plugin.getSettingsManager().isAllowedDestroyInWar() && clan.isWarring(clanHere)) {
-                    return;
-                }
-
-                if (clanHere.hasPermission(PermissionType.ALLOW_ALLY_BREAK) && clanHere.isAlly(clan.getTag())) {
-                    //System.out.println("ALLOW_ALLY_BREAK");
-                    return;
-                }
-
-                if (clanHere.hasPermission(PermissionType.ALLOW_UNVERIFIED_BREAK) && !cp.isTrusted()) {
-                    //System.out.println("ALLOW_UNVERIFIED_BREAK");
-                    return;
-                }
-            }
-
-            if (clanHere.hasPermission(PermissionType.ALLOW_OUTSIDER_BREAK)) {
-                //System.out.println("ALLOW_OUTSIDER_BREAK");
-                if (clanHere == null) {
-                    return;
-                }
-                if (!clanHere.equals(clan)) {
-                    return;
-                }
-            }
-
-            if (!clanHere.hasPermission(PermissionType.DENY_MEMBER_BREAK) && clanHere.isMember(player) && cp.isTrusted()) {
-                //System.out.println("DENY_MEMBER_BREAK");
-                return;
-            }
-
-            //return always if the player is the leader of the clan
-            if (clanHere.isLeader(player)) {
-                //System.out.println("leader");
-                return;
-            }
-
+        if (!isBreakAllowed(cp, clanHere, clan)) {
             event.setCancelled(true);
         }
 //        long endns = System.nanoTime();
 //        long end = System.currentTimeMillis();
 //        System.out.println("Checking(break) took: " + (endns - startns) + "ns " + (end - start) + "ms");
+    }
+
+    public boolean isBreakAllowed(ClanPlayer cp, Clan clanHere, Clan clan)
+    {
+        if (clanHere != null) {
+
+            String name = cp.getName();
+
+            if (clan != null) {
+
+                if (plugin.getSettingsManager().isAllowedDestroyInWar() && clan.isWarring(clanHere)) {
+                    return true;
+                }
+
+                if (clanHere.hasPermission(PermissionType.ALLOW_ALLY_BREAK) && clanHere.isAlly(clan.getTag())) {
+                    //System.out.println("ALLOW_ALLY_BREAK");
+                    return true;
+                }
+
+                if (clanHere.hasPermission(PermissionType.ALLOW_UNVERIFIED_BREAK) && clanHere.isMember(name) && !cp.isTrusted()) {
+                    //System.out.println("ALLOW_UNVERIFIED_BREAK");
+                    return true;
+                }
+            }
+
+            if (clanHere.hasPermission(PermissionType.ALLOW_OUTSIDER_BREAK)) {
+                //System.out.println("ALLOW_OUTSIDER_BREAK");
+                if (!clanHere.equals(clan)) {
+                    return true;
+                }
+            }
+
+            if (!clanHere.hasPermission(PermissionType.DENY_MEMBER_BREAK) && clanHere.isMember(name)) {
+                //System.out.println("DENY_MEMBER_BREAK");
+                return true;
+            }
+
+            //return always if the player is the leader of the clan
+            if (clanHere.isLeader(name) || (clanHere.isMember(name) || cp.isTrusted())) {
+                //System.out.println("leader");
+                return true;
+            }
+
+            return false;
+        }
+        return true;
     }
 
     @EventHandler
@@ -147,45 +154,60 @@ public class SCClaimingListener implements Listener
 
         Clan clanHere = plugin.getClanManager().getClanAt(loc);
 
+        if (!isPlaceAllowed(cp, clanHere, clan)) {
+            event.setCancelled(true);
+        }
+    }
+
+    public boolean isPlaceAllowed(ClanPlayer cp, Clan clanHere, Clan clan)
+    {
         if (clanHere != null) {
-            if (plugin.getSettingsManager().isAllowedDestroyInWar() && clan.isWarring(clanHere)) {
-                return;
-            }
+
+            String name = cp.getName();
+
+
             if (clan != null) {
+
+                if (plugin.getSettingsManager().isAllowedDestroyInWar() && clan.isWarring(clanHere)) {
+                    return true;
+                }
+
+
                 if (clanHere.hasPermission(PermissionType.ALLOW_ALLY_BUILD) && clanHere.isAlly(clan.getTag())) {
                     //System.out.println("ALLOW_ALLY_BUILD");
-                    return;
+                    return true;
                 }
 
                 if (clanHere.hasPermission(PermissionType.ALLOW_UNVERIFIED_BUILD) && !cp.isTrusted()) {
                     //System.out.println("ALLOW_UNVERIFIED_BUILD");
-                    return;
+                    return true;
                 }
             }
 
             if (clanHere.hasPermission(PermissionType.ALLOW_OUTSIDER_BUILD)) {
                 //System.out.println("ALLOW_OUTSIDER_BUILD");
                 if (clanHere == null) {
-                    return;
+                    return true;
                 }
                 if (!clanHere.equals(clan)) {
-                    return;
+                    return true;
                 }
             }
 
-            if (!clanHere.hasPermission(PermissionType.DENY_MEMBER_BUILD) && clanHere.isMember(player) && cp.isTrusted()) {
+            if (!clanHere.hasPermission(PermissionType.DENY_MEMBER_BUILD) && clanHere.isMember(name) && cp.isTrusted()) {
                 //System.out.println("DENY_MEMBER_BUILD");
-                return;
+                return true;
             }
 
             //return always if the player is the leader of the clan
-            if (clanHere.isLeader(player)) {
+            if (clanHere.isLeader(name)) {
                 //System.out.println("leader");
-                return;
+                return true;
             }
 
-            event.setCancelled(true);
+            return false;
         }
+        return true;
     }
 
     @EventHandler
@@ -200,6 +222,12 @@ public class SCClaimingListener implements Listener
         Block block = event.getClickedBlock();
 
         if (block == null) {
+            return;
+        }
+
+        Material type = block.getType();
+
+        if (!(type == Material.WOODEN_DOOR || type == Material.LEVER || type == Material.STONE_BUTTON || type == Material.WOOD_PLATE || type == Material.STONE_PLATE || type == Material.CROPS)) {
             return;
         }
 
@@ -219,48 +247,58 @@ public class SCClaimingListener implements Listener
 
         Clan clanHere = plugin.getClanManager().getClanAt(loc);
 
+        if (!isInteractAllowed(cp, clanHere, clan)) {
+            event.setCancelled(true);
+        }
+    }
+
+    public boolean isInteractAllowed(ClanPlayer cp, Clan clanHere, Clan clan)
+    {
         if (clanHere != null) {
+
+            String name = cp.getName();
 
             if (clan != null) {
 
                 if (plugin.getSettingsManager().isAllowedDestroyInWar() && clan.isWarring(clanHere)) {
-                    return;
+                    return true;
                 }
 
                 if (clanHere.hasPermission(PermissionType.ALLOW_ALLY_INTERACT) && clanHere.isAlly(clan.getTag())) {
                     //System.out.println("ALLOW_ALLY_INTERACT");
-                    return;
+                    return true;
                 }
 
                 if (clanHere.hasPermission(PermissionType.ALLOW_UNVERIFIED_INTERACT) && !cp.isTrusted()) {
                     //System.out.println("ALLOW_UNVERIFIED_INTERACT");
-                    return;
+                    return true;
                 }
             }
 
             if (clanHere.hasPermission(PermissionType.ALLOW_OUTSIDER_INTERACT)) {
                 //System.out.println("ALLOW_OUTSIDER_INTERACT");
                 if (clanHere == null) {
-                    return;
+                    return true;
                 }
                 if (!clanHere.equals(clan)) {
-                    return;
+                    return true;
                 }
             }
 
-            if (!clanHere.hasPermission(PermissionType.DENY_MEMBER_INTERACT) && clanHere.isMember(player) && cp.isTrusted()) {
+            if (!clanHere.hasPermission(PermissionType.DENY_MEMBER_INTERACT) && clanHere.isMember(name) && cp.isTrusted()) {
                 //System.out.println("DENY_MEMBER_INTERACT");
-                return;
+                return true;
             }
 
             //return always if the player is the leader of the clan
-            if (clanHere.isLeader(player)) {
+            if (clanHere.isLeader(name)) {
                 //System.out.println("leader");
-                return;
+                return true;
             }
 
-            event.setCancelled(true);
+            return false;
         }
+        return true;
     }
 
     @EventHandler
@@ -268,7 +306,7 @@ public class SCClaimingListener implements Listener
     {
         Location from = event.getFrom();
         Location to = event.getTo();
-        SpoutPlayer sp = SpoutManager.getPlayer(event.getPlayer());
+        Player player = event.getPlayer();
 
         if (from.equals(to)) {
             return;
@@ -280,48 +318,42 @@ public class SCClaimingListener implements Listener
         if (clanTo != null) {
             if (clanFrom != null) {
                 if (!clanFrom.equals(clanTo)) {
-                    if (sp.isSpoutCraftEnabled()) {
-                        plugin.getSpoutPluginManager().enterClanRegion(sp, clanTo.getTag());
+                    if (plugin.hasSpout()) {
+                        SpoutPlayer sp = SpoutManager.getPlayer(player);
+                        if (sp.isSpoutCraftEnabled()) {
+                            plugin.getSpoutPluginManager().enterClanRegion(sp, clanTo.getTag());
+                        } else {
+                            player.sendMessage(ChatColor.GRAY + clanTo.getTag());
+                        }
                     } else {
-                        sp.sendMessage(ChatColor.GRAY + clanTo.getTag());
+                        player.sendMessage(ChatColor.GRAY + clanTo.getTag());
                     }
                 }
             } else {
-                if (sp.isSpoutCraftEnabled()) {
-                    plugin.getSpoutPluginManager().enterClanRegion(sp, clanTo.getTag());
+                if (plugin.hasSpout()) {
+                    SpoutPlayer sp = SpoutManager.getPlayer(player);
+                    if (sp.isSpoutCraftEnabled()) {
+
+                        plugin.getSpoutPluginManager().enterClanRegion(sp, clanTo.getTag());
+                    } else {
+                        player.sendMessage(ChatColor.GRAY + clanTo.getTag());
+                    }
                 } else {
-                    sp.sendMessage(ChatColor.GRAY + clanTo.getTag());
+                    player.sendMessage(ChatColor.GRAY + clanTo.getTag());
                 }
             }
         } else {
             if (clanFrom != null) {
-                if (sp.isSpoutCraftEnabled()) {
-                    plugin.getSpoutPluginManager().leaveClanRegion(sp);
-                } else {
-                    sp.sendMessage(ChatColor.DARK_GREEN + plugin.getLang("wilderness"));
+                if (plugin.hasSpout()) {
+                    SpoutPlayer sp = SpoutManager.getPlayer(player);
+                    if (sp.isSpoutCraftEnabled()) {
+
+
+                        plugin.getSpoutPluginManager().leaveClanRegion(sp);
+                    } else {
+                        player.sendMessage(ChatColor.DARK_GREEN + plugin.getLang("wilderness"));
+                    }
                 }
-            }
-        }
-    }
-
-    @EventHandler
-    public void onSpoutCraftCreate(SpoutCraftEnableEvent event)
-    {
-        SpoutPlayer sp = event.getPlayer();
-        ClanPlayer cp = plugin.getClanManager().getAnyClanPlayer(sp.getName());
-        System.out.println(cp);
-        if (cp != null) {
-            Clan clan = cp.getClan();
-            System.out.println(clan);
-            cp.setupClanView(sp);
-            if (clan != null) {
-                System.out.println("Waypoint");
-                Location home = clan.getHomeChunkMiddle();
-                double x = home.getX();
-                double z = home.getZ();
-                double y = home.getY();
-
-                sp.addWaypoint("Homeblock", x, y, z);
             }
         }
     }

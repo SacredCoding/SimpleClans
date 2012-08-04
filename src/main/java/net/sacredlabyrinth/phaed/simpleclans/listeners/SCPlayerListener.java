@@ -1,7 +1,6 @@
 package net.sacredlabyrinth.phaed.simpleclans.listeners;
 
 import java.util.Iterator;
-import net.sacredlabyrinth.phaed.simpleclans.ChunkLocation;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.Helper;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
@@ -13,6 +12,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
+import org.getspout.spoutapi.SpoutManager;
 
 /**
  * @author phaed
@@ -36,7 +36,7 @@ public class SCPlayerListener implements Listener
         if (event.isCancelled()) {
             return;
         }
-        
+
         plugin.getAutoUpdater().updateCmd(event);
 
         Player player = event.getPlayer();
@@ -225,10 +225,11 @@ public class SCPlayerListener implements Listener
             public void run()
             {
                 ClanPlayer cp = plugin.getClanManager().getClanPlayer(player);
-
                 plugin.getClanManager().updateLastSeen(player);
                 plugin.getClanManager().updateDisplayName(player);
-                plugin.getSpoutPluginManager().processPlayer(player.getName());
+                if (plugin.hasSpout()) {
+                    plugin.getSpoutPluginManager().processPlayer(player.getName());
+                }
                 plugin.getPermissionsManager().setupPlayerPermissions(cp);
 
                 if (plugin.getSettingsManager().isBbShowOnLogin()) {
@@ -238,12 +239,6 @@ public class SCPlayerListener implements Listener
                             cp.getClan().displayBb(player);
                         }
                     }
-                }
-
-                ClanPlayer anyCp = plugin.getClanManager().getAnyClanPlayer(player.getName());
-
-                if (anyCp != null) {
-                    plugin.getPermissionsManager().addClanPermissions(anyCp);
                 }
             }
         }, 1);
@@ -256,17 +251,18 @@ public class SCPlayerListener implements Listener
         ClanPlayer cp = plugin.getClanManager().getClanPlayer(player);
 
         if (cp != null) {
-            ChunkLocation chunk = cp.getClan().getHomeChunk();
-            World world = chunk.getNormalWorld();
+            Location loc = cp.getClan().getHomeChunkMiddle();
+            if (loc == null) {
+                return;
+            }
+
+            World world = loc.getWorld();
 
             if (!world.equals(player.getWorld())) {
                 return;
             }
 
-            int x = chunk.getNormalX();
-            int z = chunk.getNormalZ();
-
-            cp.toSpoutPlayer().addWaypoint("Homeblock", x, chunk.getNormalWorld().getHighestBlockYAt(x, z), z);
+            SpoutManager.getPlayer(player).addWaypoint("Homeblock", loc.getX(), loc.getY(), loc.getX());
         }
     }
 
@@ -309,32 +305,26 @@ public class SCPlayerListener implements Listener
     }
 
     @EventHandler
-    public void onPlayerKick(PlayerKickEvent event)
+    public void onPlayerToggleSneak(PlayerToggleSneakEvent event)
     {
-        if (plugin.getSettingsManager().isBlacklistedWorld(event.getPlayer().getLocation().getWorld().getName())) {
-            return;
-        }
-
-        plugin.getClanManager().updateLastSeen(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlayerTeleport(PlayerTeleportEvent event)
-    {
-        if (event.isCancelled()) {
-            return;
-        }
-
-        if (plugin.getSettingsManager().isBlacklistedWorld(event.getPlayer().getLocation().getWorld().getName())) {
+        if (!plugin.hasSpout()) {
             return;
         }
 
         plugin.getSpoutPluginManager().processPlayer(event.getPlayer());
     }
 
-    @EventHandler
-    public void onPlayerToggleSneak(PlayerToggleSneakEvent event)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerTeleport(PlayerTeleportEvent event)
     {
+        if (!plugin.hasSpout()) {
+            return;
+        }
+
+        if (plugin.getSettingsManager().isBlacklistedWorld(event.getPlayer().getLocation().getWorld().getName())) {
+            return;
+        }
+
         plugin.getSpoutPluginManager().processPlayer(event.getPlayer());
     }
 }

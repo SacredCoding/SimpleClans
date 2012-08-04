@@ -8,18 +8,19 @@
  * California, 94105, USA.
  * 
  */
-package net.sacredlabyrinth.phaed.simpleclans;
+package net.sacredlabyrinth.phaed.simpleclans.commands;
 
 /**
  *
  * @author Max
  */
-public enum BankResult
+public abstract class GenericPlayerCommand extends GenericCommand
 {
 
-    PLAYER_NOT_ENOUGH_MONEY,
-    BANK_NOT_ENOUGH_MONEY,
-    SUCCESS_WITHDRAW,
-    SUCCESS_DEPOSIT,
-    FAILED;
+    public GenericPlayerCommand(String name)
+    {
+        super(name);
+    }
+
+    public abstract void execute(org.bukkit.entity.Player player, String label, String[] args);
 }

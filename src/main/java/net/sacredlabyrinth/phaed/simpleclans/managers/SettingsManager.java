@@ -121,12 +121,10 @@ public final class SettingsManager
     private boolean compatMode;
     private boolean homebaseSetOnce;
     private int waitSecs;
-    private boolean enableAutoGroups;
     private boolean moneyperkill;
     private double KDRMultipliesPerKill;
     private boolean teleportBlocks;
     private boolean AutoGroupGroupName;
-    private boolean tamableMobsSharing;
     private int strifeLimit;
     private boolean autoWar;
     private boolean claimingEnabled;
@@ -143,6 +141,11 @@ public final class SettingsManager
     private double powerLossPerDeath;
     private boolean destroyInWar;
     private boolean onlyStealOthersOnline;
+    private boolean rallyTeleportPurchase;
+    private double rallyTeleportPrice;
+    private boolean rallyTeleportSetPurchase;
+    private double rallyTeleportSetPrice;
+    private double claimPrize;
     private String header = "- SimpleClans Configuration -\nYou have to restart the server, if you want to enable claiming.\nDon't modify the 'worlds' section unless you know what you do!\nAutogrouping was removed! You can define permissions for leaders/trusted/untrusted and clans now directly here!";
 
     /**
@@ -171,7 +174,6 @@ public final class SettingsManager
         debugging = getConfig().getBoolean("settings.show-debug-info");
         mChatIntegration = getConfig().getBoolean("settings.mchat-integration");
         pvpOnlywhileInWar = getConfig().getBoolean("settings.pvp-only-while-at-war");
-        enableAutoGroups = getConfig().getBoolean("settings.enable-auto-groups");
         useColorCodeFromPrefix = getConfig().getBoolean("settings.use-colorcode-from-prefix-for-name");
         bannedPlayers = getConfig().getStringList("settings.banned-players");
         compatMode = getConfig().getBoolean("settings.chat-compatibility-mode");
@@ -273,7 +275,6 @@ public final class SettingsManager
         KDRMultipliesPerKill = getConfig().getDouble("economy.money-per-kill-kdr-multipier");
         teleportBlocks = getConfig().getBoolean("settings.teleport-blocks");
         AutoGroupGroupName = getConfig().getBoolean("permissions.auto-group-groupname");
-        tamableMobsSharing = getConfig().getBoolean("settings.tameable-mobs-sharing");
         strifeLimit = getConfig().getInt("war.strife-limit");
         autoWar = getConfig().getBoolean("war.auto-war-start");
         claimingEnabled = getConfig().getBoolean("claiming.enabled");
@@ -289,7 +290,11 @@ public final class SettingsManager
         powerLossPerDeath = getConfig().getDouble("claiming.power-loss-per-death");
         destroyInWar = getConfig().getBoolean("claiming.destroy-in-war");
         onlyStealOthersOnline = getConfig().getBoolean("claiming.steal-only-when-players-online");
-
+        rallyTeleportPurchase = getConfig().getBoolean("economy.purchase-rally-point-teleport");
+        rallyTeleportPrice = getConfig().getDouble("economy.rally-point-teleport-price");
+        rallyTeleportSetPurchase = getConfig().getBoolean("economy.purchase-rally-point-set-teleport");
+        rallyTeleportSetPrice = getConfig().getDouble("economy.rally-point-teleport-set-price");
+        claimPrize = getConfig().getDouble("claiming.claim-prize");
         //Setup the worlds in the config.yml
         ConfigurationSection section;
 
@@ -325,6 +330,11 @@ public final class SettingsManager
     public boolean isOnlyStealOthersOnline()
     {
         return onlyStealOthersOnline;
+    }
+
+    public double getClaimPrize()
+    {
+        return claimPrize;
     }
 
     /**
@@ -1298,11 +1308,6 @@ public final class SettingsManager
         this.waitSecs = waitSecs;
     }
 
-    public boolean isEnableAutoGroups()
-    {
-        return enableAutoGroups;
-    }
-
     public boolean isPvpOnlywhileInWar()
     {
         return pvpOnlywhileInWar;
@@ -1421,14 +1426,6 @@ public final class SettingsManager
     }
 
     /**
-     * @return the tamableMobsSharing
-     */
-    public boolean isTamableMobsSharing()
-    {
-        return tamableMobsSharing;
-    }
-
-    /**
      * @return the strifeLimit
      */
     public int getStrifeLimit()
@@ -1474,5 +1471,37 @@ public final class SettingsManager
     public double getPowerLossPerDeath()
     {
         return powerLossPerDeath;
+    }
+
+    /**
+     * @return the rallyTeleportPurchase
+     */
+    public boolean isRallyTeleportPurchase()
+    {
+        return rallyTeleportPurchase;
+    }
+
+    /**
+     * @return the rallyTeleportPrice
+     */
+    public double getRallyTeleportPrice()
+    {
+        return rallyTeleportPrice;
+    }
+
+    /**
+     * @return the rallyTeleportSetPurchase
+     */
+    public boolean isRallyTeleportSetPurchase()
+    {
+        return rallyTeleportSetPurchase;
+    }
+
+    /**
+     * @return the rallyTeleportSetPrice
+     */
+    public double getRallyTeleportSetPrice()
+    {
+        return rallyTeleportSetPrice;
     }
 }

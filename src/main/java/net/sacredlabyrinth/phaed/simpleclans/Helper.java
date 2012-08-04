@@ -1,17 +1,17 @@
 package net.sacredlabyrinth.phaed.simpleclans;
 
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
 import net.sacredlabyrinth.phaed.simpleclans.storage.DBCore;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.getspout.spoutapi.Spout;
 import org.getspout.spoutapi.player.SpoutPlayer;
 
@@ -39,7 +39,7 @@ public class Helper
      */
     public static Player matchOnePlayer(String playername)
     {
-        List<Player> players = SimpleClans.getInstance().getServer().matchPlayer(playername);
+        List<Player> players = Bukkit.matchPlayer(playername);
 
         if (players.size() == 1) {
             return players.get(0);
@@ -67,7 +67,7 @@ public class Helper
      */
     public static String getColorName(String playerName)
     {
-        List<Player> players = SimpleClans.getInstance().getServer().matchPlayer(playerName);
+        List<Player> players = Bukkit.matchPlayer(playerName);
 
         if (players.size() == 1) {
             return SimpleClans.getInstance().getPermissionsManager().getPrefix(players.get(0)) + players.get(0).getDisplayName() + SimpleClans.getInstance().getPermissionsManager().getSuffix(players.get(0));
@@ -99,34 +99,6 @@ public class Helper
         return o instanceof java.lang.Integer;
     }
 
-//    public static boolean isLocationInsideChunk(Location loc, ChunkLocation chunk)
-//    {
-//        System.out.println("--------------------------");
-//        System.out.println(loc.getBlockX());
-//        System.out.println(chunk.getX() << 4);
-//        System.out.println(loc.getBlockX() < chunk.getX() << 4);
-//        System.out.println(loc.getBlockX() > (chunk.getX() - 1) << 4);
-//        System.out.println(loc.getBlockZ() < chunk.getZ() << 4);
-//        System.out.println(loc.getBlockZ() > (chunk.getZ() - 1) << 4);
-//        if (loc.getBlockX() > chunk.getX() << 4
-//                && loc.getBlockX() > (chunk.getX() - 1) << 4
-//                && loc.getBlockZ() > chunk.getZ() << 4
-//                && loc.getBlockZ() > (chunk.getZ() - 1) << 4) {
-//            return true;
-//        }
-//        return false;
-//    }
-//
-//    public static boolean isLocationOutsiteChunk(Location loc, ChunkLocation chunk)
-//    {
-//        if (loc.getBlockX() > chunk.getX() << 4
-//                && loc.getBlockX() < (chunk.getX() - 1) << 4
-//                && loc.getBlockZ() > chunk.getZ() << 4
-//                && loc.getBlockZ() < (chunk.getZ() - 1) << 4) {
-//            return true;
-//        }
-//        return false;
-//    }
     /**
      * Check for byte
      *
@@ -237,15 +209,15 @@ public class Helper
      */
     public static String removeChar(String s, char c)
     {
-        String r = "";
+        StringBuilder r = new StringBuilder();
 
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) != c) {
-                r += s.charAt(i);
+                r.append(s.charAt(i));
             }
         }
 
-        return r;
+        return r.toString();
     }
 
     /**
@@ -257,16 +229,16 @@ public class Helper
      */
     public static String removeFirstChar(String s, char c)
     {
-        String r = "";
+        StringBuilder r = new StringBuilder();
 
         for (int i = 0; i < s.length(); i++) {
             if (s.charAt(i) != c) {
-                r += s.charAt(i);
+                r.append(s.charAt(i));
                 break;
             }
         }
 
-        return r;
+        return r.toString();
     }
 
     /**
@@ -314,17 +286,16 @@ public class Helper
     }
 
     /**
-     * Converts string array to ArrayList<String>, remove empty strings
+     * Converts string array to List<String>, remove empty strings
      *
      * @param values
      * @return
      */
-    public static List<String> fromArray(String... values)
+    public static List fromArray(String... values)
     {
-        List<String> results = new ArrayList<String>();
-        Collections.addAll(results, values);
-        results.remove("");
-        return results;
+        List<String> out = new ArrayList<String>(Arrays.asList(values));
+        out.remove("");
+        return out;
     }
 
     /**
@@ -333,12 +304,22 @@ public class Helper
      * @param values
      * @return
      */
-    public static HashSet<String> fromArray2(String... values)
+    public static HashSet fromArray2(String... values)
     {
-        HashSet<String> results = new HashSet<String>();
-        Collections.addAll(results, values);
-        results.remove("");
-        return results;
+        HashSet<String> out = new HashSet<String>(Arrays.asList(values));
+        out.remove("");
+        return out;
+    }
+
+    /**
+     * Converts any array to a Collection
+     *
+     * @param values
+     * @return
+     */
+    public static <T> Collection<T> convertArray(T... values)
+    {
+        return Arrays.asList(values);
     }
 
     /**
@@ -347,11 +328,9 @@ public class Helper
      * @param values
      * @return
      */
-    public static List<Player> fromPlayerArray(Player... values)
+    public static Set<Player> fromPlayerArray(Player... values)
     {
-        List<Player> results = new ArrayList<Player>();
-        Collections.addAll(results, values);
-        return results;
+        return new HashSet<Player>(Arrays.asList(values));
     }
 
     /**
@@ -360,7 +339,7 @@ public class Helper
      * @param list
      * @return
      */
-    public static String[] toArray(List<String> list)
+    public static String[] toArray(Collection<String> list)
     {
         return list.toArray(new String[list.size()]);
     }
@@ -371,14 +350,9 @@ public class Helper
      * @param args
      * @return
      */
-    public static String[] removeFirst(String[] args)
+    public static <T>T[] removeFirst(T[] args)
     {
-        List<String> out = fromArray(args);
-
-        if (!out.isEmpty()) {
-            out.remove(0);
-        }
-        return toArray(out);
+        return Arrays.copyOfRange(args, 1, args.length);
     }
 
     /**
@@ -389,13 +363,13 @@ public class Helper
      */
     public static String toMessage(String[] args)
     {
-        String out = "";
+        StringBuilder sb = new StringBuilder();
 
         for (String arg : args) {
-            out += arg + " ";
+            sb.append(arg).append(' ');
         }
 
-        return out.trim();
+        return sb.toString().trim();
     }
 
     /**
@@ -407,13 +381,14 @@ public class Helper
      */
     public static String toMessage(String[] args, String sep)
     {
-        String out = "";
+        StringBuilder sb = new StringBuilder();
 
         for (String arg : args) {
-            out += arg + ", ";
+            sb.append(arg).append(' ').append(", ");
         }
 
-        return stripTrailing(out, ", ");
+
+        return stripTrailing(sb.toString(), ", ");
     }
 
     /**
@@ -423,15 +398,15 @@ public class Helper
      * @param sep
      * @return
      */
-    public static String toMessage(List<String> args, String sep)
+    public static String toMessage(Collection<String> args, String sep)
     {
-        String out = "";
+        StringBuilder sb = new StringBuilder();
 
         for (String arg : args) {
-            out += arg + sep;
+            sb.append(arg).append(' ').append(sep);
         }
 
-        return stripTrailing(out, sep);
+        return stripTrailing(sb.toString(), sep);
     }
 
     /**
@@ -524,12 +499,12 @@ public class Helper
      */
     public static String generatePageSeparator(String sep)
     {
-        String out = "";
+        StringBuilder out = new StringBuilder();
 
         for (int i = 0; i < 320; i++) {
-            out += sep;
+            out.append(sep);
         }
-        return out;
+        return out.toString();
     }
 
     /**
@@ -540,15 +515,7 @@ public class Helper
      */
     public static boolean isOnline(String playerName)
     {
-        Player[] online = SimpleClans.getInstance().getServer().getOnlinePlayers();
-
-        for (Player o : online) {
-            if (o.getName().equalsIgnoreCase(playerName)) {
-                return true;
-            }
-        }
-
-        return false;
+        return Bukkit.getPlayerExact(playerName) != null;
     }
 
     /**
@@ -562,7 +529,7 @@ public class Helper
         List<ClanPlayer> out = new ArrayList<ClanPlayer>();
 
         for (ClanPlayer cp : in) {
-            if (SimpleClans.getInstance().getServer().getPlayer(cp.getName()) != null) {
+            if (Bukkit.getPlayer(cp.getName()) != null) {
                 out.add(cp);
             }
         }
@@ -660,6 +627,7 @@ public class Helper
         Collections.sort(list, new Comparator()
         {
 
+            @Override
             public int compare(Object o1, Object o2)
             {
                 return ((Comparable) ((Map.Entry) (o2)).getValue()).compareTo(((Map.Entry) (o1)).getValue());

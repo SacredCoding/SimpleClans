@@ -10,7 +10,9 @@
  */
 package net.sacredlabyrinth.phaed.simpleclans.commands;
 
+import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -20,10 +22,10 @@ public abstract class GenericCommand implements Command
 {
 
     private String name;
-    private String usage;
     private int minArgs;
     private int maxArgs;
     private String[] identifiers;
+    private String[] usage;
 
     public GenericCommand(String name)
     {
@@ -37,10 +39,7 @@ public abstract class GenericCommand implements Command
     }
 
     @Override
-    public abstract void execute(CommandSender sender, String label, String[] args);
-
-    @Override
-    public void setUsage(String text)
+    public void setUsages(String... text)
     {
         this.usage = text;
     }
@@ -63,7 +62,10 @@ public abstract class GenericCommand implements Command
     }
 
     @Override
-    public String getUsage()
+    public abstract String getMenu(ClanPlayer cp, CommandSender sender);
+
+    @Override
+    public String[] getUsages()
     {
         return usage;
     }
@@ -71,13 +73,13 @@ public abstract class GenericCommand implements Command
     @Override
     public int getMaxArguments()
     {
-        return minArgs;
+        return maxArgs;
     }
 
     @Override
     public int getMinArguments()
     {
-        return maxArgs;
+        return minArgs;
     }
 
     @Override

@@ -5,17 +5,17 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import net.sacredlabyrinth.phaed.simpleclans.*;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
  *
  * @author phaed
  */
-public class MapCommand
+public class MapCommand extends GenericPlayerCommand
 {
 
     private static final char northwest = '\\';
@@ -32,43 +32,52 @@ public class MapCommand
     private MapSenderThread senderThread;
     private SimpleClans plugin;
 
-    public MapCommand()
+    public MapCommand(SimpleClans plugin)
     {
-        plugin = SimpleClans.getInstance();
-        senderThread = new MapSenderThread();
-        plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, senderThread, 20L, 60L);
+        super("Map");
+        this.plugin = plugin;
+        setArgumentRange(0, 1);
+        setUsages(MessageFormat.format(plugin.getLang("usage.map"), plugin.getSettingsManager().getCommandClan()));
+        setIdentifiers(plugin.getLang("map.command"));
     }
 
-    /**
-     * Execute the command
-     *
-     * @param player
-     * @param arg
-     */
-    public void execute(Player player, String[] arg)
+    @Override
+    public String getMenu(ClanPlayer cp, CommandSender sender)
+    {
+        if (cp != null) {
+            if (plugin.getPermissionsManager().has(sender, "simpleclans.claim.map")) {
+                return MessageFormat.format(plugin.getLang("usage.menu.map"), plugin.getSettingsManager().getCommandClan(), ChatColor.WHITE);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void execute(Player player, String label, String[] args)
     {
         ClanPlayer cp = plugin.getClanManager().getClanPlayer(player);
 
         if (cp != null) {
 
             Clan clan = cp.getClan();
+            if (plugin.getPermissionsManager().has(player, "simpleclans.claim.map")) {
+                if (args.length == 0) {
 
-            if (arg.length == 0) {
-                if (plugin.getPermissionsManager().has(player, "simpleclans.claim.map")) {
                     player.sendMessage(getMap(player.getLocation(), clan));
-                } else {
-                    ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
-                }
-            } else if (arg.length == 1) {
-                if (arg[0].equalsIgnoreCase("auto")) {
-                    if (senderThread.toggle(player.getName())) {
-                        player.sendMessage("Auto");
-                    } else {
-                        player.sendMessage("remove");
+
+                } else if (args.length == 1) {
+                    if (args[0].equalsIgnoreCase("auto")) {
+                        if (senderThread.toggle(player.getName())) {
+                            player.sendMessage(ChatColor.GRAY + plugin.getLang("map.enable"));
+                        } else {
+                            player.sendMessage(ChatColor.GRAY + plugin.getLang("map.disable"));
+                        }
                     }
+                } else {
+                    player.sendMessage(ChatColor.RED + MessageFormat.format(plugin.getLang("usage.map"), plugin.getSettingsManager().getCommandClan()));
                 }
             } else {
-                player.sendMessage(ChatColor.RED + MessageFormat.format(plugin.getLang("usage.map"), plugin.getSettingsManager().getCommandClan()));
+                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
             }
         } else {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("not.a.member.of.any.clan"));
@@ -108,10 +117,7 @@ public class MapCommand
         return null;
     }
 
-    public static String getMap(Location loc, Clan playerClan)
-    {
-
-        SimpleClans plugin = SimpleClans.getInstance();
+    public String getMap(Location loc, Clan playerClan){
 
         int x = loc.getBlockX();
         int z = loc.getBlockZ();
@@ -120,9 +126,11 @@ public class MapCommand
 
         ArrayList<String> out = new ArrayList<String>();
         StringBuilder finalMap = new StringBuilder();
+        
+        Clan clanHere = plugin.getClanManager().getClanAt(loc);
 
         //header above the map
-        String header = ChatColor.GOLD + " __________________[ " + playerChunk.getX() + " " + playerChunk.getZ() + " " + (playerClan != null ? playerClan.getName() : "") + " ]__________________ \n";
+        String header = ChatColor.GOLD + " __________________[ " + playerChunk.getX() + " " + playerChunk.getZ() + " " + (clanHere != null ? clanHere.getName() : "") + " ]__________________ \n";
 
         out.add(ChatColor.GOLD + header + ChatColor.GRAY);
 
@@ -212,6 +220,8 @@ public class MapCommand
     public static String colorize(boolean active, char c)
     {
         return (active ? ChatColor.RED.toString() + c + ChatColor.GOLD.toString() : String.valueOf(c));
+
+
     }
 
     private class MapSenderThread implements Runnable

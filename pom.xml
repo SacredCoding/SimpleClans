@@ -6,9 +6,49 @@
     <version>2.4</version>
     <name>SimpleClans</name>
     <url>http://dev.bukkit.org/server-mods/simpleclans/</url>
+    
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mcVersion>1.2.5</mcVersion>
+        <project.build.number>UNKNOWN</project.build.number>
+    </properties>
+    
+    <!-- Source code -->
+    <scm>
+        <connection>scm:git:git://github.com/SacredCoding/SimpleClans.git</connection>
+        <developerConnection>scm:git:git@github.com:SacredCoding/SimpleClans.git</developerConnection>
+        <url>https://github.com/SacredCoding/SimpleClans</url>
+    </scm>
 
+    <!-- Continuous integration -->
+    <ciManagement>
+        <system>jenkins</system>
+        <url>http://jenkins.thebigdigmc.info/job/${project.name}</url>
+    </ciManagement>
+    
+    <profiles>
+        <profile>
+            <id>jenkins</id>
+            <activation>
+                <property>
+                    <name>env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <properties>
+                <project.build.number>${env.BUILD_NUMBER}</project.build.number>
+            </properties>
+        </profile>
+    </profiles>
+    
     <build>
-		<!-- Resources -->
+        
+        <finalName>
+            ${project.artifactId}-${project.version}_b${project.build.number}
+        </finalName>
+        
+        <defaultGoal>clean install</defaultGoal>
+        
+	<!-- Resources -->
         <resources>
             <resource>
                 <targetPath>.</targetPath>
@@ -22,7 +62,7 @@
             </resource>
         </resources>
 		
-		<!-- Plugins -->
+	<!-- Plugins -->
         <plugins>        
             <!-- Compilation plugin -->
             <plugin>
@@ -38,50 +78,53 @@
                 </configuration>
             </plugin>
             
-			<!-- JAR creation plugin -->
+            <!-- JAR creation plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>2.3.2</version>				
                 <configuration>
-                    <outputDirectory>${basedir}/out/</outputDirectory>
-                    <archive>
-                        <manifestEntries>
-                            <Implementation-Title>${project.name}</Implementation-Title>
-                            <Implementation-Version>${describe}</Implementation-Version>
-                            <Implementation-Vendor>TropicalDreamZ</Implementation-Vendor>
-                            
-                            <Specification-Title>${project.name}</Specification-Title>
-                            <Specification-Version>${version.number}</Specification-Version>
-                            <Specification-Vendor>SacredLabyrinth</Specification-Vendor>
-                            <Sealed>true</Sealed>
-                        </manifestEntries>
-                        <manifestSections>
-                            <manifestSection>
-                                <name>net/sacredlabyrinth/phaed/simpleclans/</name>
-                                <manifestEntries>
-                                    <Sealed>true</Sealed>
-                                </manifestEntries>
-                            </manifestSection>
-                        </manifestSections>
-                    </archive>
+              <!--      <outputDirectory>${basedir}/out/</outputDirectory> -->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>maven-replacer-plugin</artifactId>
+                <version>1.3.8</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <file>target/classes/plugin.yml</file>
+                    <replacements>
+                        <replacement>
+                            <token>maven-version-number</token>
+                            <value>${project.version}-b${project.build.number}</value>
+                        </replacement>
+                    </replacements>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+    
     <!-- Dependencies -->
     <dependencies>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.2.5-R4.0</version>
+            <version>1.2.5-R5.0</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.2.5-R4.0</version>
+            <version>1.2.5-R5.0</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -124,13 +167,8 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/LWC.jar</systemPath>
         </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.10</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
+    
     <!-- Repositories -->
     <repositories>
         <repository>
@@ -146,8 +184,4 @@
             <url>http://repo.spout.org</url>
         </repository>
     </repositories>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 </project>

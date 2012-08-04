@@ -1,8 +1,5 @@
 package net.sacredlabyrinth.phaed.simpleclans;
 
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -10,6 +7,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.util.ChatPaginator;
 
 /**
@@ -117,9 +116,9 @@ public class ChatBlock
      * @param player
      * @return
      */
-    public boolean sendBlock(Player player)
+    public boolean sendBlock(CommandSender sender)
     {
-        return sendBlock(player, null, 0);
+        return sendBlock(sender, null, 0);
     }
 
     /**
@@ -128,9 +127,9 @@ public class ChatBlock
      * @param prefix
      * @return
      */
-    public boolean sendBlock(Player player, String prefix)
+    public boolean sendBlock(CommandSender sender, String prefix)
     {
-        return sendBlock(player, prefix, 0);
+        return sendBlock(sender, prefix, 0);
     }
 
     /**
@@ -139,9 +138,9 @@ public class ChatBlock
      * @param amount
      * @return
      */
-    public boolean sendBlock(Player player, int amount)
+    public boolean sendBlock(CommandSender sender, int amount)
     {
-        return sendBlock(player, null, amount);
+        return sendBlock(sender, null, amount);
     }
 
     /**
@@ -151,9 +150,9 @@ public class ChatBlock
      * @param amount
      * @return
      */
-    boolean sendBlock(Player player, String prefix, int amount)
+    boolean sendBlock(CommandSender sender, String prefix, int amount)
     {
-        if (player == null) {
+        if (sender == null) {
             return false;
         }
 
@@ -285,10 +284,10 @@ public class ChatBlock
 
             if (msg.length() > 255) {
                 for (String s : ChatPaginator.wordWrap(msg, lineLength)) {
-                    player.sendMessage(s);
+                    sender.sendMessage(s);
                 }
             } else {
-                player.sendMessage(msg);
+                sender.sendMessage(msg);
             }
 
             prefix_used = true;
@@ -644,7 +643,7 @@ public class ChatBlock
      * @param receiver
      * @param msg
      */
-    public static void saySingle(Player receiver, String msg)
+    public static void saySingle(CommandSender receiver, String msg)
     {
         if (receiver == null) {
             return;
@@ -659,7 +658,7 @@ public class ChatBlock
      * @param receiver
      * @param msg
      */
-    public static void sendMessage(Player receiver, String msg)
+    public static void sendMessage(CommandSender receiver, String msg)
     {
         if (receiver == null) {
             return;
@@ -687,7 +686,7 @@ public class ChatBlock
      *
      * @param receiver
      */
-    public static void sendBlank(Player receiver)
+    public static void sendBlank(CommandSender receiver)
     {
         if (receiver == null) {
             return;

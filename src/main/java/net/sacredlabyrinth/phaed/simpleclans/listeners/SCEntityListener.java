@@ -6,15 +6,14 @@ import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.Helper;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 /**
  * @author phaed
@@ -82,20 +81,17 @@ public class SCEntityListener implements Listener
 
                 if (attacker != null) {
                     ClanPlayer acp = plugin.getClanManager().getCreateClanPlayer(attacker.getName());
-
-                    int strifemax = plugin.getSettingsManager().getStrifeLimit();
+                    Clan acpC = acp.getClan();
+                    Clan vcpC = vcp.getClan();
 
                     if (plugin.getSettingsManager().isAutoWar()) {
-                        if (acp.getClan() != null && vcp.getClan() != null) {
-                            if (!acp.getClan().equals(vcp.getClan()) && !acp.getClan().isWarring(vcp.getClan()) && !vcp.getClan().isWarring(acp.getClan())) {
-                                plugin.getStorageManager().addStrife(acp.getClan(), vcp.getClan(), 1);
-                                if (plugin.getStorageManager().retrieveStrifes(acp.getClan(), vcp.getClan()) >= strifemax) {
-                                    acp.getClan().addWarringClan(vcp.getClan());
-                                    vcp.getClan().addWarringClan(acp.getClan());
-                                    acp.getClan().addBb(acp.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("you.are.at.war"), Helper.capitalize(acp.getClan().getName()), vcp.getClan().getColorTag()));
-                                    vcp.getClan().addBb(vcp.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("you.are.at.war"), Helper.capitalize(vcp.getClan().getName()), acp.getClan().getColorTag()));
-                                    plugin.getStorageManager().addStrife(acp.getClan(), vcp.getClan(), -strifemax);
-                                }
+                        int strifemax = plugin.getSettingsManager().getStrifeLimit();
+                        if (acpC != null && vcpC != null) {
+                            if (plugin.getStorageManager().getStrifes(acpC, vcpC) % strifemax == 0) {
+                                acpC.addWarringClan(vcpC);
+                                vcpC.addWarringClan(acpC);
+                                acpC.addBb(acp.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("you.are.at.war"), Helper.capitalize(acpC.getName()), vcpC.getColorTag()));
+                                vcpC.addBb(vcp.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("you.are.at.war"), Helper.capitalize(vcpC.getName()), acpC.getColorTag()));
                             }
                         }
                     }
@@ -109,34 +105,35 @@ public class SCEntityListener implements Listener
                     double multipier = plugin.getSettingsManager().getKDRMultipliesPerKill();
                     float kdr = acp.getKDR();
 
-                    if (vcp.getClan() == null || acp.getClan() == null || !vcp.getClan().isVerified() || !acp.getClan().isVerified()) {
+                    if (vcpC == null || acpC == null || !vcpC.isVerified() || !acpC.isVerified()) {
                         acp.addCivilianKill();
-                        plugin.getStorageManager().insertKill(attacker, acp.getTag(), victim, "", "c");
-                    } else if (acp.getClan().isRival(vcp.getTag())) {
-
-                        if (acp.getClan().isWarring(vcp.getClan())) {
+                        plugin.getStorageManager().insertKill(attacker, acp.getTag(), victim, "", "c", false);
+                    } else if (acpC.isRival(vcp.getTag())) {
+                        boolean war = false;
+                        if (acpC.isWarring(vcpC)) {
+                            war = true;
                             reward = (double) kdr * multipier * 4;
                         } else {
                             reward = (double) kdr * multipier * 2;
                         }
 
                         acp.addRivalKill();
-                        plugin.getStorageManager().insertKill(attacker, acp.getTag(), victim, vcp.getTag(), "r");
-                    } else if (acp.getClan().isAlly(vcp.getTag())) {
+                        plugin.getStorageManager().insertKill(attacker, acp.getTag(), victim, vcp.getTag(), "r", war);
+                    } else if (acpC.isAlly(vcp.getTag())) {
 
                         reward = (double) kdr * multipier * -1;
                         acp.addNeutralKill();
 
-                        plugin.getStorageManager().insertKill(attacker, acp.getTag(), victim, vcp.getTag(), "n");
+                        plugin.getStorageManager().insertKill(attacker, acp.getTag(), victim, vcp.getTag(), "n", false);
                     } else {
                         reward = (double) kdr * multipier;
                         acp.addNeutralKill();
-                        plugin.getStorageManager().insertKill(attacker, acp.getTag(), victim, vcp.getTag(), "n");
+                        plugin.getStorageManager().insertKill(attacker, acp.getTag(), victim, vcp.getTag(), "n", false);
                     }
 
                     if (reward != 0 && plugin.getSettingsManager().isMoneyPerKill()) {
-                        for (ClanPlayer cp : acp.getClan().getOnlineMembers()) {
-                            double money = Math.round((reward / acp.getClan().getOnlineMembers().size()) * 100D) / 100D;
+                        for (ClanPlayer cp : acpC.getOnlineMembers()) {
+                            double money = Math.round((reward / acpC.getOnlineMembers().size()) * 100D) / 100D;
                             cp.toPlayer().sendMessage(ChatColor.AQUA + MessageFormat.format(plugin.getLang("player.got.money"), money, victim.getName(), kdr));
                             plugin.getPermissionsManager().playerGrantMoney(cp.getName(), money);
                         }
@@ -167,53 +164,6 @@ public class SCEntityListener implements Listener
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onPlayerInteract(PlayerInteractEntityEvent event)
-    {
-
-        if (plugin.getSettingsManager().isTamableMobsSharing()) {
-            if (event.getRightClicked() instanceof Tameable) {
-
-                Player player = event.getPlayer();
-                ClanPlayer cp = plugin.getClanManager().getClanPlayer(player);
-
-                if (cp == null) {
-                    return;
-                }
-
-                Entity entity = event.getRightClicked();
-
-                Tameable tamed = (Tameable) entity;
-
-                if (tamed.isTamed()) {
-                    AnimalTamer owner = tamed.getOwner();
-                    if (owner != null) {
-                        if (cp.getClan().isMember((Player) owner)) {
-                            tamed.setOwner(player);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onEntityTarget(EntityTargetLivingEntityEvent event)
-    {
-        if (plugin.getSettingsManager().isTamableMobsSharing()) {
-            if (event.getEntity() instanceof Wolf && event.getTarget() instanceof Player) {
-                ClanPlayer cp = plugin.getClanManager().getClanPlayer((Player) event.getTarget());
-                Tameable wolf = (Tameable) event.getEntity();
-                if (wolf.isTamed()) {
-                    if (cp.getClan().isMember((Player) wolf.getOwner())) {
-                        // cancels the event if the attacker is one out of his clan
-                        event.setCancelled(true);
-                    }
-                }
-            }
-        }
-    }
-
-    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent event)
     {
         Player attacker = null;
@@ -226,20 +176,6 @@ public class SCEntityListener implements Listener
             if (sub.getEntity() instanceof Player && sub.getDamager() instanceof Player) {
                 attacker = (Player) sub.getDamager();
                 victim = (Player) sub.getEntity();
-            }
-
-            if (plugin.getSettingsManager().isTamableMobsSharing()) {
-                if (sub.getEntity() instanceof Wolf && sub.getDamager() instanceof Player) {
-                    attacker = (Player) sub.getDamager();
-                    Wolf wolf = (Wolf) sub.getEntity();
-                    ClanPlayer cp = plugin.getClanManager().getClanPlayer(attacker);
-                    if (wolf.isTamed()) {
-                        if (cp.getClan().isMember((Player) wolf.getOwner())) {
-                            // Sets the wolf to friendly if the attacker is one out of his clan
-                            wolf.setAngry(false);
-                        }
-                    }
-                }
             }
 
             if (sub.getEntity() instanceof Player && sub.getDamager() instanceof Arrow) {
@@ -292,14 +228,14 @@ public class SCEntityListener implements Listener
             if (vclan != null) {
                 if (aclan != null) {
                     // personal ff enabled, allow damage
-
-                    if (vcp.isFriendlyFire()) {
+                    //skip if globalff is on
+                    if (plugin.getSettingsManager().isGlobalff() || vcp.isFriendlyFire()) {
                         return;
                     }
 
                     // clan ff enabled, allow damage
 
-                    if (vclan.isFriendlyFire()) {
+                    if (plugin.getSettingsManager().isGlobalff() || vclan.isFriendlyFire()) {
                         return;
                     }
 
