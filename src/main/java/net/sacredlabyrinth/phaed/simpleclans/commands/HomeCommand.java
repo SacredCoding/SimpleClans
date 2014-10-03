@@ -1,14 +1,15 @@
 package net.sacredlabyrinth.phaed.simpleclans.commands;
 
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Random;
 import net.sacredlabyrinth.phaed.simpleclans.*;
+import net.sacredlabyrinth.phaed.simpleclans.events.PlayerHomeSetEvent;
+import net.sacredlabyrinth.phaed.simpleclans.events.PlayerHomeTeleportEvent;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.Random;
-import net.sacredlabyrinth.phaed.simpleclans.events.PlayerHomeSetEvent;
 
 /**
  * @author phaed
@@ -49,6 +50,12 @@ public class HomeCommand {
             if (clan != null)
             {
                 Location loc = clan.getHomeLocation();
+                PlayerHomeTeleportEvent homeTeleportEvent = new PlayerHomeTeleportEvent(clan, SimpleClans.getInstance().getClanManager().getClanPlayer(player), loc);
+                SimpleClans.getInstance().getServer().getPluginManager().callEvent(homeTeleportEvent);
+                if (homeTeleportEvent.isCancelled())
+                {
+                    return;
+                }
                 if (loc == null)
                 {
                     ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("hombase.not.set"));
@@ -76,10 +83,13 @@ public class HomeCommand {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("clan.is.not.verified"));
             return;
         }
-        if (!cp.isTrusted())
+        if (!SimpleClans.getInstance().getSettingsManager().getAllowNoTrustedHomeCommand())
         {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("only.trusted.players.can.access.clan.vitals"));
-            return;
+            if (!cp.isTrusted())
+            {
+                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("only.trusted.players.can.access.clan.vitals"));
+                return;
+            }
         }
         if (arg.length == 0)
         {
@@ -91,6 +101,12 @@ public class HomeCommand {
             if (plugin.getClanManager().purchaseHomeTeleport(player))
             {
                 Location loc = clan.getHomeLocation();
+                PlayerHomeTeleportEvent homeTeleportEvent = new PlayerHomeTeleportEvent(clan, SimpleClans.getInstance().getClanManager().getClanPlayer(player), loc);
+                SimpleClans.getInstance().getServer().getPluginManager().callEvent(homeTeleportEvent);
+                if (homeTeleportEvent.isCancelled())
+                {
+                    return;
+                }
                 if (loc == null)
                 {
                     ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("hombase.not.set"));

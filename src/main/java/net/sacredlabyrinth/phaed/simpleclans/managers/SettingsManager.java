@@ -134,6 +134,7 @@ public final class SettingsManager
     private int strifeLimit;
     private boolean autoWar;
     private boolean allowReGroupCommand;
+    private boolean allowNoTrustedHomeCommand;
     private boolean useThreads;
     private boolean useBungeeCord;
 
@@ -287,6 +288,7 @@ public final class SettingsManager
         strifeLimit = getConfig().getInt("war.strife-limit");
         autoWar = getConfig().getBoolean("war.auto-war-start");
         allowReGroupCommand = getConfig().getBoolean("settings.allow-regroup-command");
+        allowNoTrustedHomeCommand = getConfig().getBoolean("settings.allow-no-trusted-home-command");
         useThreads = getConfig().getBoolean("performance.use-threads");
         useBungeeCord = getConfig().getBoolean("performance.use-bungeecord");
 
@@ -1363,6 +1365,14 @@ public final class SettingsManager
     public boolean getAllowReGroupCommand()
     {
         return allowReGroupCommand;
+    }
+    
+    /**
+     * @return the allowNoTrustedHomeCommand
+     */
+    public boolean getAllowNoTrustedHomeCommand()
+    {
+        return allowNoTrustedHomeCommand;
     }
     
     /**
