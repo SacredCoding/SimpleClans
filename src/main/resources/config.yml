@@ -41,6 +41,7 @@ settings:
     server-name: '&9MinecraftServer'
     new-clan-verification-required: true
     allow-regroup-command: true
+    allow-no-trusted-home-command: false
 spout:
     in-game-tags: true
     alert-url: ''
