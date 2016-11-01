@@ -13,7 +13,11 @@ import org.bukkit.entity.Player;
  */
 public class UUIDMigration {
 
+	private UUIDMigration() {}
+	
     public static boolean canReturnUUID() {
+        if(!SimpleClans.getInstance().getSettingsManager().isOnlineMode())
+            return false;
         try {
             Bukkit.class.getDeclaredMethod("getPlayer", UUID.class);
             return true;

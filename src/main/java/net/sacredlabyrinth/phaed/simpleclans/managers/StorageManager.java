@@ -27,7 +27,7 @@ public final class StorageManager
 
     private SimpleClans plugin;
     private DBCore core;
-    private HashMap<String, ChatBlock> chatBlocks = new HashMap<String, ChatBlock>();
+    private HashMap<String, ChatBlock> chatBlocks = new HashMap<>();
 
     /**
      *
@@ -36,7 +36,8 @@ public final class StorageManager
     {
         plugin = SimpleClans.getInstance();
         initiateDB();
-        updateDatabase();
+        if(SimpleClans.getInstance().getSettingsManager().isOnlineMode())
+            updateDatabase();
         importFromDatabase();
     }
 
@@ -90,7 +91,7 @@ public final class StorageManager
     {
         if (plugin.getSettingsManager().isUseMysql())
         {
-            core = new MySQLCore(plugin.getSettingsManager().getHost(), plugin.getSettingsManager().getPort(), plugin.getSettingsManager().getDatabase(), plugin.getSettingsManager().getUsername(), plugin.getSettingsManager().getPassword());
+            core = new MySQLCore(plugin.getSettingsManager().getHost(), plugin.getSettingsManager().getDatabase(), plugin.getSettingsManager().getPort(), plugin.getSettingsManager().getUsername(), plugin.getSettingsManager().getPassword());
 
             if (core.checkConnection())
             {
@@ -192,7 +193,7 @@ public final class StorageManager
             clan.validateWarring();
         }
 
-        if (clans.size() > 0)
+        if (!clans.isEmpty())
         {
             SimpleClans.log(MessageFormat.format("[SimpleClans] " + plugin.getLang("clans"), clans.size()));
         }
@@ -211,7 +212,7 @@ public final class StorageManager
             plugin.getClanManager().importClanPlayer(cp);
         }
 
-        if (cps.size() > 0)
+        if (!cps.isEmpty())
         {
             SimpleClans.log(MessageFormat.format("[SimpleClans] " + plugin.getLang("clan.players"), cps.size()));
         }
@@ -245,7 +246,7 @@ public final class StorageManager
 
     private void purgeClans(List<Clan> clans)
     {
-        List<Clan> purge = new ArrayList<Clan>();
+        List<Clan> purge = new ArrayList<>();
 
         for (Clan clan : clans)
         {
@@ -275,16 +276,13 @@ public final class StorageManager
 
     private void purgeClanPlayers(List<ClanPlayer> cps)
     {
-        List<ClanPlayer> purge = new ArrayList<ClanPlayer>();
+        List<ClanPlayer> purge = new ArrayList<>();
 
         for (ClanPlayer cp : cps)
         {
-            if (cp.getInactiveDays() > plugin.getSettingsManager().getPurgePlayers())
+            if (cp.getInactiveDays() > plugin.getSettingsManager().getPurgePlayers() && !cp.isLeader())
             {
-                if (!cp.isLeader())
-                {
-                    purge.add(cp);
-                }
+            	purge.add(cp);
             }
         }
 
@@ -303,7 +301,7 @@ public final class StorageManager
      */
     public List<Clan> retrieveClans()
     {
-        List<Clan> out = new ArrayList<Clan>();
+        List<Clan> out = new ArrayList<>();
 
         String query = "SELECT * FROM  `sc_clans`;";
         ResultSet res = core.select(query);
@@ -465,7 +463,7 @@ public final class StorageManager
      */
     public List<ClanPlayer> retrieveClanPlayers()
     {
-        List<ClanPlayer> out = new ArrayList<ClanPlayer>();
+        List<ClanPlayer> out = new ArrayList<>();
 
         String query = "SELECT * FROM  `sc_players`;";
         ResultSet res = core.select(query);
@@ -701,6 +699,35 @@ public final class StorageManager
     }
 
     /**
+     * Change the name of a player in the database asynchronously
+     * 
+     * @param Player to update
+     */
+    @SuppressWarnings("deprecation")
+	public void updatePlayerNameAsync(final Player p)
+    {
+        plugin.getServer().getScheduler().scheduleAsyncDelayedTask(plugin, new Runnable()
+        {
+            @Override
+            public void run()
+            {
+            	updatePlayerName(p);
+            }
+        });
+    }
+    
+    /**
+     * Change the name of a player in the database asynchronously
+     * 
+     * @param Player to update
+     */
+    public void updatePlayerName(final Player p)
+    {
+        String query = "UPDATE `sc_players` SET `name` = '"+p.getName()+"' WHERE uuid = '"+p.getUniqueId().toString()+"';";
+        core.update(query);
+    }
+    
+    /**
      * Update a clan to the database
      *
      * @param clan
@@ -857,9 +884,9 @@ public final class StorageManager
      * @param playerName
      * @return
      */
-    public HashMap<String, Integer> getKillsPerPlayer(String playerName)
+    public Map<String, Integer> getKillsPerPlayer(String playerName)
     {
-        HashMap<String, Integer> out = new HashMap<String, Integer>();
+        HashMap<String, Integer> out = new HashMap<>();
 
         String query = "SELECT victim, count(victim) AS kills FROM `sc_kills` WHERE attacker = '" + playerName + "' GROUP BY victim ORDER BY count(victim) DESC;";
         ResultSet res = core.select(query);
@@ -899,9 +926,9 @@ public final class StorageManager
      *
      * @return
      */
-    public HashMap<String, Integer> getMostKilled()
+    public Map<String, Integer> getMostKilled()
     {
-        HashMap<String, Integer> out = new HashMap<String, Integer>();
+        HashMap<String, Integer> out = new HashMap<>();
 
         String query = "SELECT attacker, victim, count(victim) AS kills FROM `sc_kills` GROUP BY attacker, victim ORDER BY 3 DESC;";
         ResultSet res = core.select(query);
@@ -985,13 +1012,10 @@ public final class StorageManager
             core.execute(query);
         }
 
-        if (core.existsColumn("sc_players", "uuid"))
+        if (core.existsColumn("sc_players", "uuid") && !plugin.getSettingsManager().isUseMysql())
         {
-            if (!plugin.getSettingsManager().isUseMysql())
-            {
-                query = "CREATE UNIQUE INDEX IF NOT EXISTS `uq_player_uuid` ON `sc_players` (`uuid`);";
-                core.execute(query);
-            }
+        	query = "CREATE UNIQUE INDEX IF NOT EXISTS `uq_player_uuid` ON `sc_players` (`uuid`);";
+            core.execute(query);
         }
     }
 
@@ -1044,7 +1068,7 @@ public final class StorageManager
         SimpleClans.log("[SimpleClans] ==================== END OF MIGRATION ====================");
 
 
-        if (cps.size() > 0)
+        if (!cps.isEmpty())
         {
             SimpleClans.log(MessageFormat.format("[SimpleClans] " + plugin.getLang("clan.players"), cps.size()));
         }

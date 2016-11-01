@@ -19,6 +19,8 @@ import java.util.*;
  */
 public class Helper
 {
+	
+	private Helper() {}
 
     /**
      * Dumps stacktrace to log
@@ -257,7 +259,7 @@ public class Helper
      */
     public static List<String> fromArray(String... values)
     {
-        List<String> results = new ArrayList<String>();
+        List<String> results = new ArrayList<>();
         Collections.addAll(results, values);
         results.remove("");
         return results;
@@ -269,9 +271,9 @@ public class Helper
      * @param values
      * @return
      */
-    public static HashSet<String> fromArray2(String... values)
+    public static Set<String> fromArray2(String... values)
     {
-        HashSet<String> results = new HashSet<String>();
+        HashSet<String> results = new HashSet<>();
         Collections.addAll(results, values);
         results.remove("");
         return results;
@@ -285,7 +287,7 @@ public class Helper
      */
     public static List<Player> fromPlayerArray(Player... values)
     {
-        List<Player> results = new ArrayList<Player>();
+        List<Player> results = new ArrayList<>();
         Collections.addAll(results, values);
         return results;
     }
@@ -543,7 +545,7 @@ public class Helper
      */
     public static List<ClanPlayer> stripOffLinePlayers(List<ClanPlayer> in)
     {
-        List<ClanPlayer> out = new ArrayList<ClanPlayer>();
+        List<ClanPlayer> out = new ArrayList<>();
 
         for (ClanPlayer cp : in)
         {
@@ -631,11 +633,7 @@ public class Helper
      */
     public static boolean isSameLocation(Location loc, Location loc2)
     {
-        if (loc.getX() == loc2.getX() && loc.getY() == loc2.getY() && loc.getZ() == loc2.getZ())
-        {
-            return true;
-        }
-        return false;
+        return loc.getX() == loc2.getX() && loc.getY() == loc2.getY() && loc.getZ() == loc2.getZ();
     }
 
     /**
@@ -668,15 +666,9 @@ public class Helper
 
     public static boolean isVanished(Player player)
     {
-        if (player != null)
+        if (player != null && player.hasMetadata("vanished") && !player.getMetadata("vanished").isEmpty())
         {
-            if (player.hasMetadata("vanished"))
-            {
-                if (!player.getMetadata("vanished").isEmpty())
-                {
-                    return player.getMetadata("vanished").get(0).asBoolean();
-                }
-            }
+        	return player.getMetadata("vanished").get(0).asBoolean();
         }
         return false;
     }
@@ -694,7 +686,7 @@ public class Helper
             }
             else
             {
-                return ((Collection<Player>) players);
+                return (Collection<Player>) players;
             }
         }
         catch (Exception e)
