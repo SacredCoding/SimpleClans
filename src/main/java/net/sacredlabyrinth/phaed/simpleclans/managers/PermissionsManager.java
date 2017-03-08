@@ -9,6 +9,7 @@ import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.plugin.Plugin;
@@ -229,21 +230,21 @@ public final class PermissionsManager {
     }
 
     /**
-     * Check if a player has permissions
+     * Check if a sender has permissions
      *
-     * @param player the player
+     * @param sender the sender
      * @param perm   the permission
      * @return whether he has the permission
      */
-    public boolean has(Player player, String perm) {
-        if (player == null) {
+    public boolean has(CommandSender sender, String perm) {
+        if (sender == null) {
             return false;
         }
 
         if (permission != null) {
-            return permission.has(player, perm);
+            return permission.has(sender, perm);
         } else {
-            return player.hasPermission(perm);
+            return sender.hasPermission(perm);
         }
     }
 

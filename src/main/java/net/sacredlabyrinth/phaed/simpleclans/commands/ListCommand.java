@@ -5,6 +5,7 @@ import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.Helper;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
@@ -23,21 +24,21 @@ public class ListCommand {
     /**
      * Execute the command
      *
-     * @param player
+     * @param sender
      * @param arg
      */
-    public void execute(Player player, String[] arg) {
+    public void execute(CommandSender sender, String[] arg) {
         SimpleClans plugin = SimpleClans.getInstance();
         String headColor = plugin.getSettingsManager().getPageHeadingsColor();
         String subColor = plugin.getSettingsManager().getPageSubTitleColor();
         NumberFormat formatter = new DecimalFormat("#.#");
 
-        if (!plugin.getPermissionsManager().has(player, "simpleclans.anyone.list")) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+        if (!plugin.getPermissionsManager().has(sender, "simpleclans.anyone.list")) {
+            ChatBlock.sendMessage(sender, ChatColor.RED + plugin.getLang("insufficient.permissions"));
             return;
         }
         if (arg.length != 0) {
-            ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.list"), plugin.getSettingsManager().getCommandClan()));
+            ChatBlock.sendMessage(sender, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.list"), plugin.getSettingsManager().getCommandClan()));
             return;
         }
 
@@ -45,16 +46,16 @@ public class ListCommand {
         plugin.getClanManager().sortClansByKDR(clans);
 
         if (clans.isEmpty()) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.clans.have.been.created"));
+            ChatBlock.sendMessage(sender, ChatColor.RED + plugin.getLang("no.clans.have.been.created"));
             return;
         }
 
         ChatBlock chatBlock = new ChatBlock();
-        ChatBlock.sendBlank(player);
-        ChatBlock.saySingle(player, plugin.getSettingsManager().getServerName() + subColor + " " + plugin.getLang("clans.lower") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
-        ChatBlock.sendBlank(player);
-        ChatBlock.sendMessage(player, headColor + plugin.getLang("total.clans") + " " + subColor + clans.size());
-        ChatBlock.sendBlank(player);
+        ChatBlock.sendBlank(sender);
+        ChatBlock.saySingle(sender, plugin.getSettingsManager().getServerName() + subColor + " " + plugin.getLang("clans.lower") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
+        ChatBlock.sendBlank(sender);
+        ChatBlock.sendMessage(sender, headColor + plugin.getLang("total.clans") + " " + subColor + clans.size());
+        ChatBlock.sendBlank(sender);
         chatBlock.setAlignment("c", "l", "c", "c");
         chatBlock.setFlexibility(false, true, false, false);
         chatBlock.addRow("  " + headColor + plugin.getLang("rank"), plugin.getLang("name"), plugin.getLang("kdr"), plugin.getLang("members"));
@@ -76,15 +77,15 @@ public class ListCommand {
             rank++;
         }
 
-        boolean more = chatBlock.sendBlock(player, plugin.getSettingsManager().getPageSize());
+        boolean more = chatBlock.sendBlock(sender, plugin.getSettingsManager().getPageSize());
 
         if (more) {
-            plugin.getStorageManager().addChatBlock(player, chatBlock);
-            ChatBlock.sendBlank(player);
-            ChatBlock.sendMessage(player, headColor + MessageFormat.format(plugin.getLang("view.next.page"), plugin.getSettingsManager().getCommandMore()));
+            plugin.getStorageManager().addChatBlock(sender, chatBlock);
+            ChatBlock.sendBlank(sender);
+            ChatBlock.sendMessage(sender, headColor + MessageFormat.format(plugin.getLang("view.next.page"), plugin.getSettingsManager().getCommandMore()));
         }
 
-        ChatBlock.sendBlank(player);
+        ChatBlock.sendBlank(sender);
     }
 }
 
