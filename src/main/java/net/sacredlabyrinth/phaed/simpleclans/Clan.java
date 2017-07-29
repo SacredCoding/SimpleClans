@@ -376,6 +376,22 @@ public class Clan implements Serializable, Comparable<Clan> {
         bb.add(msg);
         SimpleClans.getInstance().getStorageManager().updateClan(this);
     }
+    
+    /**
+     * Adds a bulletin board message without announcer
+     *
+     * @param msg
+     *
+     * @param updateLastUsed should the clan's last used time be updated as well?
+     */
+    public void addBb(String msg, boolean updateLastUsed) {
+        while (bb.size() > SimpleClans.getInstance().getSettingsManager().getBbSize()) {
+            bb.remove(0);
+        }
+
+        bb.add(msg);
+        SimpleClans.getInstance().getStorageManager().updateClan(this, updateLastUsed);
+    }
 
     /**
      * Clears the bulletin board
