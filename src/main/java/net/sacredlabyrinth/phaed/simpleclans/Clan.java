@@ -1538,6 +1538,20 @@ public class Clan implements Serializable, Comparable<Clan> {
             clanAnnounce(announcerName, SimpleClans.getInstance().getSettingsManager().getBbAccentColor() + "* " + SimpleClans.getInstance().getSettingsManager().getBbColor() + Helper.parseColors(msg));
         }
     }
+    
+    /**
+     * Add a new bb message and announce it to all online members of a clan
+     *
+     * @param announcerName
+     * @param msg
+     * @param updateLastUsed
+     */
+    public void addBb(String announcerName, String msg, boolean updateLastUsed) {
+        if (isVerified()) {
+            addBb(SimpleClans.getInstance().getSettingsManager().getBbColor() + msg, updateLastUsed);
+            clanAnnounce(announcerName, SimpleClans.getInstance().getSettingsManager().getBbAccentColor() + "* " + SimpleClans.getInstance().getSettingsManager().getBbColor() + Helper.parseColors(msg));
+        }
+    }
 
     /**
      * Displays bb to a player
