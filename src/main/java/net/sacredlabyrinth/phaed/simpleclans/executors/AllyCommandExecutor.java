@@ -22,9 +22,9 @@ public class AllyCommandExecutor implements CommandExecutor {
         if (!plugin.getSettingsManager().isAllyChatEnable()) {
             return false;
         }
-        
+      
         plugin.getClanManager().processAllyChat(player, Helper.toMessage(strings));
-        
+      
         return false;
     }
 }

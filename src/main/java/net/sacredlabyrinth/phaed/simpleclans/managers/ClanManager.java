@@ -1105,6 +1105,7 @@ public final class ClanManager {
             
             String message = Helper.formatClanChat(cp, ce.getMessage(), ce.getPlaceholders());
             String eyeMessage = Helper.formatSpyClanChat(cp, message);
+
             plugin.getServer().getConsoleSender().sendMessage(eyeMessage);
             
             for (ClanPlayer p : ce.getReceivers()) {
