@@ -38,6 +38,11 @@ public class SCEntityListener implements Listener
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityDeath(EntityDeathEvent event)
     {
+        if (event.isCancelled())
+        {
+            return;
+        }
+
         if (event.getEntity() instanceof Player)
         {
             Player victim = (Player) event.getEntity();
