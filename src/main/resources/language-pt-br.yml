@@ -1,0 +1,414 @@
+create.command: criar
+list.command: lista
+profile.command: perfil
+roster.command: roster
+lookup.command: info
+leaderboard.command: rank
+alliances.command: aliancas
+rivalries.command: rivalidades
+vitals.command: saude
+coords.command: coords
+stats.command: status
+ally.command: aliado
+rival.command: rival
+bb.command: bb
+cape.command: capa
+modtag.command: modtag
+toggle.command: alterar
+invite.command: convidar
+kick.command: kick
+bank.command: banco
+trust.command: confiar
+untrust.command: desconfiar
+promote.command: promover
+demote.command: rebaixar
+clanff.command: clanff
+ff.command: ff
+resign.command: sair
+disband.command: desfazer
+verify.command: verificar
+ban.command: ban
+unban.command: unban
+reload.command: reload
+globalff.command: globalff
+kills.command: kills
+mostkilled.command: mostkilled
+war.command: guerra
+home.command: home
+setrank.command: setrank
+place.command: place
+resetkdr.command: redefinirkdr
+usage.resetkdr: 'Usage: /{0} resetkdr [all/player]'
+usage.clan.alliances: 'Uso: /{0} aliancas'
+usage.ally: 'Uso: /{0} aliado add/remove [tag]'
+usage.ban.unban: 'Uso: /{0} ban/unban [jogador]'
+usage.rival: 'Uso: /{0} rival add/remove [tag]'
+usage.war: 'Uso: /{0} guerra start/end [tag]'
+usage.cape.url: 'Uso: /{0} capa [url]'
+usage.setrank: 'Uso: /{0} setrank [jogador] [rank], rank pode ser vários mundos e conter códigos de cores &f'
+usage.clanff: 'Uso: /{0} clanff allow/block'
+usage.0.coords: 'Uso: /{0} coords'
+usage.create.tag: 'Uso: /{0} criar [tag] [nome]'
+usage.demote.leader: 'Uso: /{0} demote [líder]'
+usage.0.disband: 'Uso: /{0} desfazer'
+usage.0.ff.allow.auto: 'Uso: /{0} ff allow/auto'
+usage.0.globalff.allow.auto: 'Uso: /{0} globalff allow/auto'
+usage.0.permissions.player: 'Uso: /{0} permissions [clan] add/remove [permissão]'
+usage.0.invite.player: 'Uso: /{0} convidar [jogador]'
+usage.kick.player: 'Uso: /{0} kick [jogador]'
+usage.bank: 'Uso: /{0} banco withdraw/deposit/status [amount]'
+usage.0.modtag.tag: 'Uso: /{0} modtag [tag]'
+usage.list: 'Uso: /{0} lista'
+usage.lookup.tag: 'Uso: /{0} info [tag]'
+usage.0.profile.tag: 'Uso: /{0} perfil [tag]'
+usage.0.promote.member: 'Uso: /{0} promover <member>'
+usage.0.rivalries: 'Uso: /{0} rivalidades'
+usage.0.roster.tag: 'Uso: /{0} roster [tag]'
+usage.0.stats: 'Uso: /{0} status'
+usage.0.trust.player: 'Uso: /{0} confiar [jogador]'
+usage.0.untrust.player: 'Uso: /{0} desconfiar [jogador]'
+usage.0.verify.tag: 'Uso: /{0} verificar [tag]'
+usage.0.vitals: 'Uso: /{0} vitals'
+usage.0.place: 'Uso: /{0} place [jogador] [tag]'
+usage.0.leaderboard: 'Uso: /{0} rank'
+0.reload.1.reload.configuration: /{0} reload{1} - Recarregar configuração
+0.globalff.allow.auto.1.set.global.friendly.fire: /{0} globalff allow/auto {1} - Definir fogo amigo global
+0.place: /{0} place [jogador] [tag]{1} - Coloque um jogador em um clã
+0.ban.unban.player.1.ban.unban.a.player: /{0} ban/unban [jogador]{1} - Banir/Desbanir um jogador
+0.hometp.clan.1.tp.home.a.clan: /{0} home tp [clan]{1} - Teleporte para todas as bases dos clãs
+0.disband.tag.1.disband.a.clan: /{0} desfazer [tag]{1} - Desfazer um clã
+0.resetkdr.1.resets.kdr: /{0} resetkdr player/all{1} - Reset KDR of all players or just of one
+0.resetkdr.1.resets.your.kdr: /{0} resetkdr{1} - Reset your KDR
+0.verify.tag.1.verify.an.unverified.clan: /{0} verificar [tag]{1} - Verificar um clã não verificado
+0.verify.1.purchase.verification.of.your.clan: /{0} verificar{1} - Compra de verificação do seu clã
+0.list.1.lists.all.clans: /{0} lista{1} - Lista todos os clãs
+0.profile.1.view.your.clan.s.profile: /{0} perfil{1} - Ver o perfil do seu clã
+0.profile.tag.1.view.a.clan.s.profile: /{0} perfil [tag]{1} - Ver o perfil de um clã
+0.lookup.1.lookup.your.info: /{0} info{1} - Pesquise suas informações
+0.lookup.player.1.lookup.a.player.s.info: /{0} info [jogador]{1} - Pesquisar informações de um jogador
+0.leaderboard.1.view.leaderboard: /{0} rank{1} - Ver tabela de classificação
+0.alliances.1.view.all.clan.alliances: /{0} aliancas{1} - Ver todas as alianças do clã
+0.rivalries.1.view.all.clan.rivalries: /{0} rivalidades{1} - Ver todas as rivalidades de clãs
+0.roster.1.view.your.clan.s.member.list: /{0} roster{1} - Veja a lista de membros do seu clã
+0.roster.tag.1.view.a.clan.s.member.list: /{0} roster [tag]{1} - Veja a lista de membros de um clã
+0.vitals.1.view.your.clan.member.s.vitals: /{0} vitals{1} - Veja os sinais vitais do seu membro do clã
+0.coords.1.view.your.clan.member.s.coordinates: /{0} coords{1} - Veja as coordenadas dos membros do seu clã
+0.stats.1.view.your.clan.member.s.stats: /{0} status{1} - Ver as estatísticas dos membros do seu clã
+0.ally.add.remove.tag.1.add.remove.an.ally.clan: /{0} aliado add/remove [tag]{1} - Adicionar/remover um clã aliado
+0.rival.add.remove.tag.1.add.remove.a.rival.clan: /{0} rival add/remove [tag]{1} - Adicionar/remover um clã rival
+0.bb.1.display.bulletin.board: /{0} bb{1} - Exibir quadro de avisos
+0.bb.msg.1.add.a.message.to.the.bulletin.board: /{0} bb [msg]{1} - Adicionar uma mensagem ao quadro de avisos
+0.modtag.tag.1.modify.the.clan.s.tag: /{0} modtag [tag]{1} - Modifique a tag do clã
+0.cape.url.1.change.your.clan.s.cape: /{0} capa [url]{1} - Mude a capa do seu clã
+0.invite.player.1.invite.a.player: /{0} convidar [jogador]{1} - Convide um jogador
+0.kick.player.1.kick.a.player.from.the.clan: /{0} kick [jogador]{1} - Kickar um jogador do clã
+0.trust.untrust.player.1.set.trust.level1: /{0} confiar [jogador]{1} - Definir membro como confiável
+0.trust.untrust.player.1.set.trust.level2: /{0} desconfiar [jogador]{1} - Definir membro como não confiável
+0.promote.member.1.promote.a.member.to.leader: /{0} promover [member]{1} - Promover um membro para líder
+0.demote.leader.1.demote.a.leader.to.member: /{0} rebaixar [líder]{1} - Demote um líder para membro
+0.clanff.allow.block.1.toggle.clan.s.friendly.fire: /{0} clanff allow/block{1} - Alternar o fogo amigo do clã
+0.ff.allow.auto.1.toggle.personal.friendly.fire: /{0} ff allow/auto{1} - Alternar fogo amigo pessoal
+0.toggle.command: /{0} alterar [{2}]{1} - Alternar configurações pessoais
+0.resign.1.resign.from.the.clan: /{0} sair{1} - Saia do seu clã
+0.disband.1.disband.your.clan: /{0} desfazer{1} - Desfaça seu clã
+0.trust.setrank: /{0} setrank [jogador] [rank]{1} - Dê um rank a um jogador
+0.create.tag.name.1.purchase.a.new.clan: /{0} criar [tag] [nome]{1} - Compre um novo clã
+0.create.tag.name.1.create.a.new.clan: /{0} criar [tag] [nome]{1} - Crie um novo clã
+0.kills: /{0} kills{1} - Veja suas contagens de Kills
+0.killsplayer: /{0} kills [jogador]{1} - Ver as contagens de Kills de um jogador
+0.mostkilled: /{0} mostkilled{1} - Ver as contagens mais Kills em todo o servidor
+home-menu: /{0} home{1} - Teleporte para base do clã
+home-set-menu: /{0} home set{1} - Definir a base do clã
+home-clear-menu: /{0} home clear{1} - Limpar a base do clã
+home-regroup-menu: /{0} home regroup [me]{1} - Regroup all members to clan home-base or to you
+example.clan.modtag.4kfo.4l: 'Exemplo: /clan modtag &4R&fD&4K'
+example.clan.create: 'Exemplo: /clan criar &1RDK Reis das kills'
+clan: Clã
+allies: Aliados
+alliances: alianças
+coords: coords
+name: Nome
+distance: Distância
+coords.upper: Coords
+world: Mundo
+kdr: KDR
+members: Membros
+clans.lower: clãs
+rival: Rival
+civilian: Civil
+neutral: Neutro
+free.agent: Sem Clã
+days: dias
+rivals: Rivais
+rivalries: rivalidades
+online: Online
+player: Jogador
+seen: Visto
+leader: líder
+roster: lista
+trusted: confiável
+untrusted: não confiável
+deaths: Mortes
+weights: Pesos
+stats: Estatísticas
+health: Saúde
+armor: Armaduras
+weapons: Armas
+food: Comida
+vitals: sinais vitais
+verified: Verificado
+unverified: Não verificado
+profile: profile
+civilian.abbreviation: Civ
+rank: Rank
+leaders: Líderes
+none: Nenhum
+today: Hoje
+kills: Kills
+mostkilled: Matou mais
+killcount: Contagem de Kills
+attacker: Atacante
+victim: Vítima
+kill.death.ratio: Kill/Morte Relação
+nokillsfound: Nenhuma Kill encontrada
+version.loaded: '[{0}] Versão {1} carregada'
+promoted.to.leader: '{0} foi promovido a líder'
+denied.demotion: '{0} negou o rebaixamento de {1}. Consenso falhou.'
+membership.invitation: '{0} negou o convite de associação'
+joined.the.clan: '{0} se juntou ao clã'
+signed.off.request.cancelled: '{0} assinou. {1} pedido cancelado.'
+clan.deletion: '{0} negou a exclusão do clã. Consenso falhou.'
+has.been.disbanded: Clã {0} foi desfeito
+denied.the.promotion: '{0} negou a promoção de {1}. Consenso falhou.'
+demoted.back.to.member: '{0} foi rebaixado de volta para o membro'
+peace.agreement.denied: O acordo de paz com {0} foi negado
+denied.to.make.peace: '{0} negou para fazer as pazes com {1}'
+broken.the.rivalry: '{0} quebrou a rivalidade com {1}'
+broken.the.rivalry.with: '{0} quebrou a rivalidade com {1}'
+the.alliance.was.denied: A aliança com {0} foi negada
+denied.an.alliance: '{0} negou uma aliança com {1}'
+accepted.an.alliance: '{0} aceitou uma aliança com {1}'
+created.an.alliance: '{0} criou uma aliança com {1}'
+has.joined: '{0} juntou-se a {1}'
+proposing.to.end.the.rivalry: '{0} está propondo acabar com a rivalidade com {1}'
+proposing.an.alliance: '{0} está propondo uma aliança com {1}'
+inviting.you.to.join: '{0} está convidando você para participar de {1}'
+asking.for.the.deletion: '{0} está pedindo a exclusão do clã'
+asking.for.the.promotion: '{0} está pedindo a promoção de {1}'
+asking.for.the.demotion: '{0} está pedindo o rebaixamento de {1}'
+accept.or.deny: '{0} ou {1}'
+not.sufficient.money: Você não tem dinheiro suficiente na sua conta
+account.has.been.debited: Foi debitado de sua conta ${0} Coins
+mysql.connection.successful: Conexão MySQL bem sucedida
+mysql.connection.failed: Conexão MySQL falhou
+sqlite.connection.successful: Conexão SQLite bem sucedida
+sqlite.connection.failed: ' Conexão SQLite falhou'
+purging.player.data: 'Apagando os dados do jogador: {0}'
+purging.clan: 'Apagando clã: {0}'
+clan.players: 'Jogadores do clã: {0}'
+clans: 'Clãs: {0}'
+banned: Você está proibido de usar comandos de clã
+nothing.more.to.see: Nada mais para ver
+nothing.to.deny: Nada a negar
+no.leader.permissions: Você não tem permissões de líder
+you.have.already.voted: Você já votou
+has.voted.to.deny: '{0} votou a favor de negar'
+nothing.to.accept: Nada a aceitar
+view.next.page: Type /{0} para ver a próxima página.
+voted.to.accept: '{0} votou para aceitar'
+bulletin.board.header: '{0}* {1}{2} quadro de avisos'
+has.been.disbanded.rivalry.ended: '{0} foi desfeito. A rivalidade terminou.'
+has.been.disbanded.alliance.ended: '{0} foi desfeito. Aliança terminou.'
+clan.disbanded: Clã foi desfeito
+1.color.day: 1 {0}dia
+many.color.days: '{0}{1} dias'
+does.not.match: Não corresponde a um comando de clã
+simpleclans.command.failure: 'Falha de comando do SimpleClans: {0}'
+insufficient.permissions: Você não tem permissão para isto!
+clan.is.not.verified: Clã não é verificado
+not.a.member.of.any.clan: Você não é membro de nenhum clã
+minimum.to.make.alliance: Seu clã deve ter pelo menos {0} jogadores para fazer alianças
+no.clan.matched: Nenhum clã correspondido
+cannot.ally.with.an.unverified.clan: Você não pode se aliar a um clã não verificado
+your.clans.are.not.allies: Seus clãs não são aliados
+has.broken.the.alliance: '{0} quebrou a aliança com {1}'
+at.least.one.leader.accept.the.alliance: Pelo menos um líder dos aliados deve estar online para aceitar a aliança
+leaders.have.been.asked.for.an.alliance: '{0} líderes foram convidados para uma aliança'
+your.clans.are.already.allies: Seus clãs já são aliados
+your.clan.cannot.create.rivals: Seu clã não pode criar rivais
+min.players.rivalries: Seu clan deve ter pelo menos {0} jogadores para fazer rivalidades
+this.player.is.already.banned: Este jogador já está banido
+player.added.to.banned.list: Jogador adicionado à lista banida
+you.banned: Você foi banido dos comandos do clã
+cape.must.be.png: O URL da capa deve apontar para uma imagem png
+url.error: O URL está retornando um erro. Por favor, verifique se está funcionando.
+changed.the.clan.cape: '{0} mudou a capa do clã'
+clan.wide.friendly.fire.blocked: Fogo amigo do clã bloqueado
+clan.wide.friendly.fire.is.allowed: O fogo amigo do clã é permitido
+only.trusted.players.can.access.clan.coords: Somente jogadores confiáveis ​​podem acessar as coordenadas do clã
+you.are.the.only.member.online: Você é o único membro online
+your.clan.tag.cannot.be.longer.than.characters: A tag do seu clã não pode ter mais de {0} caracteres
+your.clan.tag.must.be.longer.than.characters: A tag do seu clã deve ter mais de {0} caracteres
+your.tag.cannot.contain.the.following.colors: 'Sua tag não pode conter as seguintes cores: {0}'
+your.tag.cannot.contain.color.codes: Your tag cannot contain color codes
+your.clan.name.cannot.be.longer.than.characters: O nome do seu clã não pode ter mais de {0} caracteres
+your.clan.name.must.be.longer.than.characters: O nome do seu clã deve ter mais de {0} caracteres
+your.clan.tag.can.only.contain.letters.numbers.and.color.codes: A tag do seu clã pode conter apenas letras, números e códigos de cores
+your.clan.name.cannot.contain.color.codes: O nome do seu clã não pode conter códigos de cores
+that.tag.name.is.disallowed: A tag que você escolheu não é permitida pelo servidor!
+you.must.first.resign: Você deve primeiro renunciar de {0} /clan sair
+clan.with.this.tag.already.exists: Um clã com esta tag já existe
+get.your.clan.verified.to.access.advanced.features: Obtenha uma verificação de clã para acessar recursos avançados
+clan.created: Clã {0} foi criado
+leaders.must.be.online.to.vote.on.demotion: Todos os outros líderes que não os rebaixados devem estar online para votar neste rebaixamento
+demotion.vote.has.been.requested.from.all.leaders: O voto de rebaixamento foi solicitado a todos os líderes
+player.is.not.a.leader.of.your.clan: O jogador não é um líder do seu clã
+clan.has.been.disbanded: Clã {0} foi desfeito
+clan.disband.vote.has.been.requested.from.all.leaders: O voto de desfazer do clã foi solicitado a todos os líderes
+friendy.fire.is.now.managed.by.your.clan: Fogo amigo agora é gerenciado pelo seu clã
+personal.friendly.fire.is.set.to.allowed: Fogo amigo está definido como permitido
+global.friendy.fire.is.now.managed.by.each.clan: O fogo amigo global é agora gerenciado por cada clã
+global.friendy.fire.is.already.being.managed.by.each.clan: Fogo amigo global já está sendo gerenciado por cada clã
+global.friendly.fire.is.set.to.allowed: Fogo amigo global é definido como permitido
+global.friendly.fire.is.already.being.allowed: Fogo amigo global já está sendo permitido
+no.player.matched: Nenhum jogador correspondido
+the.player.doesn.t.not.have.the.permissions.to.join.clans: O jogador não tem permissões para participar de clãs
+you.cannot.invite.yourself: Você não pode se convidar
+this.player.is.banned.from.using.clan.commands: Este jogador está proibido de usar comandos de clã
+the.player.is.already.member.of.another.clan: O jogador já é membro de outro clã
+has.been.asked.to.join: '{0} foi convidado a participar de {1}'
+you.cannot.kick.yourself: Você não pode se kickar
+the.player.is.not.a.member.of.your.clan: O jogador não é um membro do seu clã
+you.cannot.kick.another.leader: Você não pode kickar outro líder
+has.been.kicked.by: '{0} foi kickado por {1}'
+no.clans.have.been.created: Nenhum clã foi criado
+total.clans: 'Total de clãs:'
+legend: 'lenda:'
+kill.type.civilian: 'Kills Civils: {0} (Jogadores sem clã)'
+no.player.data.found: Nenhum dado do jogador encontrado
+kill.type.0: 'Tipo de Kill: {0}'
+s.player.info: Informação do jogador {0}
+clan.0: 'Clã: {0}'
+status.0: 'Status: {0}'
+rank.0: 'Rank: {0}'
+kdr.0: 'KDR: {0}'
+deaths.0: 'Mortes: {0}'
+join.date.0: 'Data de afiliação: {0}'
+last.seen.0: 'Visto pela última vez: {0}'
+past.clans.0: 'Clãs passados: {0}'
+inactive.0: 'Inativo: {0}'
+kill.totals: 'Total de kills:'
+clan.commands: comandos do clã
+you.can.only.modify.the.color.and.case.of.the.tag: Você só pode modificar a cor e o maiusculo minusculo da tag
+tag.changed.to.0: Tag alterada para {0}
+name.0: 'Nome: {0}'
+leaders.0: 'Líderes: {0}'
+members.online.0: 'Membros Online: {0}'
+allies.0: 'Aliados: {0}'
+rivals.0: 'Rivais: {0}'
+founded.0: 'Fundado: {0}'
+the.member.to.be.promoted.must.be.online: O membro a ser promovido deve estar online
+the.player.does.not.have.the.permissions.to.lead.a.clan: O jogador não tem permissão para liderar um clã
+you.cannot.promote.yourself: Você não pode se promover
+all.leaders.must.be.online.to.vote.on.this.promotion: Todos os líderes devem estar online para votar nesta promoção
+the.player.is.already.a.leader: O jogador já é um líder
+configuration.reloaded: Configuração recarregada
+last.leader.cannot.resign.you.must.appoint.another.leader.or.disband.the.clan: O último líder não pode renunciar. Você deve nomear outro líder ou desfazer o clã
+0.has.resigned: '{0} saiu do clã'
+only.trusted.players.can.access.clan.stats: Somente jogadores confiáveis ​​podem acessar as estatísticas do clã
+you.cannot.trust.yourself: Você não pode confiar em si mesmo
+leaders.are.already.trusted: Líderes já são confiáveis
+this.player.is.already.trusted: Este jogador já é confiável
+has.been.given.trusted.status.by: '{0} recebeu status de confiança de {1}'
+this.player.is.not.banned: Este jogador não está banido
+player.removed.from.the.banned.list: Jogador removido da lista banida
+you.have.been.unbanned.from.clan.commands: Você foi desbanido dos comandos do clã
+you.cannot.untrust.yourself: Você não pode desconfiar de si mesmo
+leaders.cannot.be.untrusted: Líderes não podem ser não confiáveis
+this.player.is.already.untrusted: Este jogador já não é confiável
+has.been.given.untrusted.status.by: '{0} recebeu status não confiável de {1}'
+the.clan.does.not.exist: O clã não existe
+the.clan.is.already.verified: O clã já está verificado
+the.clan.has.been.verified: O clã foi verificado
+clan.0.has.been.verified: Clã {0} foi verificado!
+only.trusted.players.can.access.clan.vitals: Somente jogadores confiáveis ​​podem acessar os sinais vitais do clã
+total.clan.players.0: 'Total de jogadores no clã: {0}'
+proposing.war: '{0} está propondo começar uma guerra com {1}'
+you.can.only.start.war.with.rivals: Você só pode começar a guerra com os rivais
+leaders.have.been.asked.to.accept.the.war.request: '{0} líderes foram solicitados a aceitar o pedido de guerra'
+leaders.asked.to.end.rivalry: '{0} líderes foram convidados a acabar com a guerra'
+proposing.to.end.the.war: '{0} está propondo acabar com a guerra com {1}'
+clans.already.at.war: Seus clãs já estão em guerra
+clans.not.at.war: Seus clãs não estão em guerra
+you.are.at.war: '{0} está agora em guerra com {1}'
+denied.war.req: '{0} negou o pedido de guerra enviado por {1}'
+you.are.no.longer.at.war: '{0} não está mais em guerra com {1}'
+end.war.denied: O pedido para acabar com a guerra foi negado por {0}
+denied.war.end: '{0} negou o pedido de {1} para acabar com a guerra'
+0.war: /{0} guerra{1} start/end [tag] - Comece ou termine uma guerra"
+has.initiated.a.rivalry: '{0} iniciou uma rivalidade com {1}'
+start: start
+end: end
+add: add
+remove: remove
+allow: allow
+block: block
+auto: auto
+war: guerra
+0.s.sword.1.2.b.bow.3.4.a.arrow: '{0}S: ''Espada{1}, {2}B: ''Arco{3}, {4}A: ''Flecha'
+weapon.S: S
+weapon.B: B
+weapon.A: A
+materials: Materials
+armor.h: H
+armor.c: C
+armor.l: L
+armor.B: B
+diamond: diamond
+gold: gold
+wood: wood
+server.announce: Anunciar no servidor
+clan.announce: Anunciar do clã
+leader.announce: Líder anuncia
+hunger: Hunger
+stone: Stone
+iron: Iron
+the.clan.cannot.be.rivaled: O clã não pode ser rivalizado
+capeoff: Capa desativado
+capeon: Capa ativado
+bboff: BB desativado
+bbon: BB ativado
+tagoff: Tag desativada
+tagon: Tag ativada
+withdrawon: Withdraw toggled on
+withdrawoff: Withdraw toggled off
+home.base.only.once: Home base can only be set once
+now.at.homebase: You are now at {0}''s home base
+hombase.set: 'Base do clã definida como: {0}'
+hombase.cleared: Clan home-base limpa
+hombase.mod.set: 'A home base de {0} está definida para:'
+hombase.not.set: Home-base não definida
+rival.limit.reached: Você atingiu o limite rival. Você não pode rivalizar com mais clãs.
+you.moved.teleport.cancelled: Você se moveu, teleporte cancelado
+waiting.for.teleport.stand.still.for.0.seconds: Esperando por teletransporte, fique parado por {0} segundos
+no.teleport: Você não tem permissão para se teletransportar para esse local
+true: 'on'
+false: 'off'
+leave: leave
+join: join
+mute: mute
+player.rank.changed: Rank foi definido
+your.clans.are.already.rivals: Seus clãs já são rivais
+player.got.money: 'Você tem {0} para matar {1} com base em você KDR: {2}'
+cleared.bb: Limpei o quadro de avisos
+clan.balance: 'Saldo do Clã: {0}'
+bb.clan.deposit: '{0} $ foram depositados'
+player.clan.deposit: Você depositou {0}
+bb.clan.withdraw: '{0} $ foram retirados'
+player.clan.withdraw: Você retira {0}
+clan.bank.not.enough.money: Seu banco do clã não tem dinheiro suficiente
+your.clans.are.not.rivals: Seus clãs não são rivais
+the.clan.members.reached.limit: Your clan members reached limit
+you.have.reseted.your.kdr: You have reseted your KDR
+you.have.reseted.0.kdr: You have reseted {0}''s KDR
+you.have.reseted.kdr.of.all.players: You have reseted the KDR of all players
