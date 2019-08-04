@@ -746,6 +746,9 @@ public final class ClanManager {
         count += getFoodPoints(inv, Material.PORKCHOP, 3, 1.8);
         count += getFoodPoints(inv, Material.RABBIT, 3, 1.8);
         count += getFoodPoints(inv, Material.SALMON, 1, .4);
+        count += getFoodPoints(inv, Material.COD, 2, .4);
+        count += getFoodPoints(inv, Material.COOKED_COD, 5, 6);
+        count += getFoodPoints(inv, Material.TROPICAL_FISH, 1, .2);
         count += getFoodPoints(inv, Material.ROTTEN_FLESH, 4, .8);
         count += getFoodPoints(inv, Material.SPIDER_EYE, 2, 3.2);
         count += getFoodPoints(inv, Material.COOKED_BEEF, 8, 12.8);
