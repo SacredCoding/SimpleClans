@@ -145,6 +145,18 @@ permissions:
     default: true
   simpleclans.leader.coloredtag:
     description: Can use color codes in tags
+  simpleclans.leader.rank.list:
+    description: Can list the ranks
+  simpleclans.leader.rank.create:
+    description: Can create a new rank
+  simpleclans.leader.rank.assign:
+    description: Can assign a rank to a user
+  simpleclans.leader.rank.delete:
+    description: Can delete a rank
+  simpleclans.leader.rank.permissions.add:
+    description: Can add permissions to a rank
+  simpleclans.leader.rank.permissions.remove:
+    description: Can remove permissions from a rank
   simpleclans.member.bank:
     description: Can use banks
   simpleclans.admin.*:
