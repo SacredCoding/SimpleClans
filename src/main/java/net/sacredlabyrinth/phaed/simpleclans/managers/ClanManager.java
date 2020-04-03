@@ -577,7 +577,7 @@ public final class ClanManager {
      * @param uuid the player's uuid
      */
     public void ban(UUID uuid) {
-        return getClanPlayer(uuid);
+        ban(getClanPlayer(uuid));
     }
     
     /**
@@ -585,7 +585,7 @@ public final class ClanManager {
      */
     @Deprecated
     public void ban(String playerName) {
-        return getClanPlayer(playerName);
+        ban(getClanPlayer(playerName));
     }
 
     /**
