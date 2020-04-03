@@ -67,6 +67,7 @@ public class AllyCommand {
 
         if (!ally.isVerified()) {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("cannot.ally.with.an.unverified.clan"));
+            return;
         }
 
         if (action.equals(plugin.getLang("add"))) {
