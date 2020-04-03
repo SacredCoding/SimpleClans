@@ -541,15 +541,15 @@ public final class ClanManager {
             }
         }
     }
-
-    
-    /**
+	
+     /**
      * Bans a player from clan commands
      * 
-     * @param uuid the player's uuid
+     * @param clanPlayer the ClanPlayer class
      */
-    public void ban(UUID uuid) {
-        ClanPlayer cp = getClanPlayer(uuid);
+    public void ban(ClanPlayer cp) {
+	if (cp == null)
+		return;
         Clan clan = cp.getClan();
 
         if (clan != null) {
@@ -569,31 +569,23 @@ public final class ClanManager {
 
         plugin.getSettingsManager().addBanned(uuid);
     }
+
+    
+    /**
+     * Bans a player from clan commands
+     * 
+     * @param uuid the player's uuid
+     */
+    public void ban(UUID uuid) {
+        return getClanPlayer(uuid);
+    }
     
     /**
      * @param playerName
      */
     @Deprecated
     public void ban(String playerName) {
-        ClanPlayer cp = getClanPlayer(playerName);
-        Clan clan = cp.getClan();
-
-        if (clan != null) {
-            if (clan.getSize() == 1) {
-                clan.disband();
-            } else {
-                cp.setClan(null);
-                cp.addPastClan(clan.getColorTag() + (cp.isLeader() ? ChatColor.DARK_RED + "*" : ""));
-                cp.setLeader(false);
-                cp.setJoinDate(0);
-                clan.removeMember(playerName);
-
-                plugin.getStorageManager().updateClanPlayer(cp);
-                plugin.getStorageManager().updateClan(clan);
-            }
-        }
-
-        plugin.getSettingsManager().addBanned(playerName);
+        return getClanPlayer(playerName);
     }
 
     /**
