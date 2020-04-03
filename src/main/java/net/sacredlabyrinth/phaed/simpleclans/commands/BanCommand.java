@@ -49,10 +49,11 @@ public class BanCommand {
 
 		Player pl = SimpleClans.getInstance().getServer().getPlayer(uuid);
 
-		if (pl != null) {
-			ChatBlock.sendMessage(pl, ChatColor.AQUA + plugin.getLang("you.banned"));
+		if (pl == null) {
+			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
 		}
 
+	        ChatBlock.sendMessage(pl, ChatColor.AQUA + plugin.getLang("you.banned"));
 		plugin.getClanManager().ban(uuid);
 		ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("player.added.to.banned.list"));
     }
