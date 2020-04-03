@@ -545,10 +545,10 @@ public final class ClanManager {
      /**
      * Bans a player from clan commands
      * 
-     * @param clanPlayer the ClanPlayer class
+     * @param cp the ClanPlayer class
      */
     public void ban(ClanPlayer cp) {
-	if (cp == null)
+	if (cp == null) // Just in case someone forgets to check before calling this
 		return;
         Clan clan = cp.getClan();
 
