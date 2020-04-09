@@ -149,7 +149,7 @@ public class MenuCommand {
             toggles += "tag/";
         }
         
-        if (isVerified && isLeader && plugin.getPermissionsManager().has(player, "simpleclans.leader.fee")) {
+        if (isVerified && isLeader && plugin.getSettingsManager().isMemberFee() && plugin.getPermissionsManager().has(player, "simpleclans.leader.fee")) {
             toggles += "fee/";
         }
 
