@@ -4,6 +4,8 @@ import java.text.MessageFormat;
 import net.sacredlabyrinth.phaed.simpleclans.ChatBlock;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
+import net.sacredlabyrinth.phaed.simpleclans.PermissionLevel;
+import net.sacredlabyrinth.phaed.simpleclans.RankPermission;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -26,7 +28,7 @@ public class FeeCommand {
         	ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("disabled.command"));
             return;
         }
-
+        
         if (args.length >= 1) {
             ClanPlayer cp = plugin.getClanManager().getAnyClanPlayer(player.getUniqueId());
             Clan clan = cp.getClan();
@@ -49,8 +51,7 @@ public class FeeCommand {
                 return;
             }
             if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
-                if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.fee")) {
-                    ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+                if (!plugin.getPermissionsManager().has(player, RankPermission.FEE_SET, PermissionLevel.LEADER, true)) {
                     return;
                 }
                 if (!cp.isLeader()) {
