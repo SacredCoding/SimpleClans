@@ -23,6 +23,7 @@ public class FeeCommand {
     public void execute(Player player, String[] args) {
         SimpleClans plugin = SimpleClans.getInstance();
         if (!plugin.getSettingsManager().isMemberFee()) {
+        	ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("disabled.command"));
             return;
         }
 
