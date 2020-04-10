@@ -549,9 +549,10 @@ public final class ClanManager {
      */
     public void ban(UUID uuid) {
         ClanPlayer cp = getClanPlayer(uuid);
-	Clan clan = null;
-	if(cp != null)
+        Clan clan = null;
+        if (cp != null) {
         	clan = cp.getClan();
+        }
 
         if (clan != null) {
             if (clan.getSize() == 1) {
@@ -577,9 +578,10 @@ public final class ClanManager {
     @Deprecated
     public void ban(String playerName) {
         ClanPlayer cp = getClanPlayer(playerName);
-	Clan clan = null;
-	if(cp != null)
-        	clan = cp.getClan();
+		Clan clan = null;
+		if (cp != null) {
+			clan = cp.getClan();
+		}
 
         if (clan != null) {
             if (clan.getSize() == 1) {

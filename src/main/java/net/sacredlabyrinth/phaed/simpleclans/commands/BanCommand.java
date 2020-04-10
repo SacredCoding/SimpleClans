@@ -38,9 +38,9 @@ public class BanCommand {
 
 		UUID uuid = UUIDMigration.getForcedPlayerUUID(arg[0]);
 		if (uuid == null) {
-            		ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
-            		return;
-        	}
+			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
+			return;
+		}
 		
 		if (plugin.getSettingsManager().isBanned(uuid)) {
 			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("this.player.is.already.banned"));
@@ -49,9 +49,9 @@ public class BanCommand {
 
 		plugin.getClanManager().ban(uuid);
 		ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("player.added.to.banned.list"));
-	    
-	        Player pl = SimpleClans.getInstance().getServer().getPlayer(uuid);
-	    	if (pl != null) {
+
+		Player pl = SimpleClans.getInstance().getServer().getPlayer(uuid);
+		if (pl != null) {
 			ChatBlock.sendMessage(pl, ChatColor.AQUA + plugin.getLang("you.banned"));
 		}
     }
