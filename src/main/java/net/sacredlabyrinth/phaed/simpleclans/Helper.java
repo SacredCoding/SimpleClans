@@ -19,6 +19,7 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.Map.Entry;
+
 import net.sacredlabyrinth.phaed.simpleclans.managers.SettingsManager;
 
 /**
@@ -40,14 +41,33 @@ public class Helper {
     
     /**
      * Converts a JSON String to a list of Ranks
+     * 
      * @param json
-     * @return a list of ranks or null if the json string is null/empty
+     * @return a list of ranks or null if the JSON String is null/empty
      */
-    @SuppressWarnings("unchecked")
 	public static List<Rank> ranksFromJson(String json) {
     	if (json != null && !json.isEmpty()) {
 	    	try {
-				return (List<Rank>) new JSONParser().parse(json);
+				JSONObject jo = (JSONObject) new JSONParser().parse(json);
+				Object ranks = jo.get("ranks");
+				if (ranks != null) {
+					JSONArray array = (JSONArray) ranks;
+					List<Rank> rankList = new ArrayList<>();
+					for (Object o : array) {
+						JSONObject r = (JSONObject) o;
+						String name = (String) r.get("name");
+						String displayName = (String) r.get("displayName");
+						Set<String> permissions = new HashSet<>();
+						for (Object p : (JSONArray) r.get("permissions")) {
+							permissions.add((String) p);
+						}
+						Rank rank = new Rank(name, displayName, permissions);
+						rankList.add(rank);
+					}
+					
+					return rankList;
+					
+				}
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -61,12 +81,27 @@ public class Helper {
      * @param ranks
      * @return a JSON String
      */
-    public static String ranksToJson(List<Rank> ranks) {
+    @SuppressWarnings("unchecked")
+	public static String ranksToJson(List<Rank> ranks) {
     	if (ranks == null)
     		ranks = new ArrayList<Rank>();
-    	// TODO Criar json object
-    	//JSONArray.toJSONString(list);
-    	return JSONObject.toString("ranks", ranks);
+    	
+    	JSONArray array = new JSONArray();
+    	for (Rank rank : ranks) {
+    		JSONObject o = new JSONObject();
+    		o.put("name", rank.getName());
+    		o.put("displayName", rank.getDisplayName());
+    		JSONArray permArray = new JSONArray();
+    		for (String p : rank.getPermissions()) {
+    			permArray.add(p);
+    		}
+    		o.put("permissions", permArray);
+    		array.add(o);
+    	}
+    	
+    	JSONObject object = new JSONObject();
+    	object.put("ranks", array);
+    	return object.toJSONString();
     }
     
     /**
@@ -350,6 +385,20 @@ public class Helper {
      */
     public static String[] toArray(List<String> list) {
         return list.toArray(new String[list.size()]);
+    }
+    
+    /**
+     * Converts the Permission values array to a String array
+     * 
+     * @return
+     */
+    public static String[] fromPermissionArray() {
+    	RankPermission[] permissions = RankPermission.values();
+    	String[] sa = new String[permissions.length];
+    	for (int i = 0; i < permissions.length; i++) {
+    		sa[i] = permissions[i].toString();
+    	}
+    	return sa;
     }
 
     /**

@@ -14,12 +14,22 @@ public class Rank implements Comparable<Rank> {
 	private Set<String> permissions;
 	
 	public Rank(String name) {
+		setName(name);
+		permissions = new HashSet<String>();
+		setDisplayName(displayName);
+	}
+	
+	public Rank(String name, String displayName, Set<String> permissions) {
+		setName(name);
+		setDisplayName(displayName);
+		setPermissions(permissions);
+	}
+	
+	public void setName(String name) {
 		if (name == null || name.isEmpty()) {
 			throw new IllegalArgumentException("name cannot be null or empty");
 		}
-		permissions = new HashSet<String>();
 		this.name = name;
-		setDisplayName(displayName);
 	}
 
 	public void setDisplayName(String displayName) {
@@ -27,6 +37,13 @@ public class Rank implements Comparable<Rank> {
 			displayName = name;
 		}
 		this.displayName = displayName;
+	}
+	
+	public void setPermissions(Set<String> permissions) {
+		if (permissions == null) {
+			permissions = new HashSet<String>();
+		}
+		this.permissions = permissions;
 	}
 
 	@Override
@@ -54,15 +71,29 @@ public class Rank implements Comparable<Rank> {
 		return true;
 	}
 
-
+	/**
+	 * Returns the rank's permissions
+	 * 
+	 * @return
+	 */
 	public Set<String> getPermissions() {
 		return permissions;
 	}
 
+	/**
+	 * Returns the rank's display name
+	 * 
+	 * @return
+	 */
 	public String getDisplayName() {
 		return displayName;
 	}
 
+	/**
+	 * Returns the rank's name
+	 * 
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}

@@ -994,6 +994,9 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
 
     public void setRank(String rank)
     {
+    	if (rank == null) {
+    		rank = "";
+    	}
         this.rank = rank;
     }
 

@@ -13,6 +13,7 @@ import net.sacredlabyrinth.phaed.simpleclans.ChatBlock;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.Helper;
+import net.sacredlabyrinth.phaed.simpleclans.RankPermission;
 import net.sacredlabyrinth.phaed.simpleclans.Rank;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
@@ -39,10 +40,6 @@ public class RankCommand {
 		plugin = SimpleClans.getInstance();
 		ClanManager clanManager = plugin.getClanManager();
 		
-		// TODO Adicionar comando para mostrar permissões disponíveis
-		// TODO Verificar se a permissão é válida antes de adicionar
-		// TODO Check for permissions
-		
 		clanPlayer = clanManager.getClanPlayer(player);
 		if (clanPlayer == null) {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("not.a.member.of.any.clan"));
@@ -68,6 +65,9 @@ public class RankCommand {
 				case "assign":
 					assignRank(args);
 					return;
+				case "unassign":
+					unassign(args);
+					return;
 				case "create":
 					createRank(args);
 					return;
@@ -92,6 +92,10 @@ public class RankCommand {
 	}
 	
 	private void assignRank(String[] args) {
+		if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.assign")) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            return;
+		}
 		if (args.length != 2) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.0.rank.assign"),
             		plugin.getSettingsManager().getCommandClan()));
@@ -102,9 +106,10 @@ public class RankCommand {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
             return;
         }
+        
         String rank = args[1];
 		if (!clan.hasRank(rank)) {
-			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("rank.does.not.exist"));
+			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("rank.0.does.not.exist"));
 			return;
 		}
         
@@ -113,11 +118,38 @@ public class RankCommand {
         plugin.getStorageManager().updateClanPlayer(cpTarget);
         ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("player.rank.changed"));
 	}
+	
+	private void unassign(String[] args) {
+		if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.unassign")) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            return;
+		}
+		if (args.length != 1) {
+			ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.0.rank.unassign"),
+            		plugin.getSettingsManager().getCommandClan()));
+			return;
+		}
+		
+		UUID uuid = UUIDMigration.getForcedPlayerUUID(args[0]);
+        if (uuid == null || (!clan.isMember(uuid) && !clan.isLeader(uuid))) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
+            return;
+        }
+        
+        ClanPlayer cpTarget = plugin.getClanManager().getClanPlayer(uuid);
+		cpTarget.setRank(null);
+        plugin.getStorageManager().updateClanPlayer(cpTarget);
+        ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("player.unassigned.from.rank"));
+	}
 
 	private void createRank(String[] args) {
+		if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.create")) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            return;
+		}
 		if (args.length != 1) {
-			// TODO Replace 0
-			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("usage.0.rank.create"));
+			ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.0.rank.create"),
+            		plugin.getSettingsManager().getCommandClan()));
 			return;
 		}
 		
@@ -133,6 +165,10 @@ public class RankCommand {
 	}
 
 	private void listRanks() {
+		if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.list")) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            return;
+		}
 		List<Rank> ranks = clan.getRanks();
 		
 		if (ranks.isEmpty()) {
@@ -150,6 +186,10 @@ public class RankCommand {
 	}
 
 	private void deleteRank(String[] args) {
+		if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.delete")) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            return;
+		}
 		if (args.length != 1) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.0.rank.delete"),
             		plugin.getSettingsManager().getCommandClan()));
@@ -157,7 +197,7 @@ public class RankCommand {
 		}
 		String rank = args[0];
 		if (!clan.hasRank(rank)) {
-			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("rank.does.not.exist"));
+			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("rank.0.does.not.exist"));
 			return;
 		}
 		clan.deleteRank(rank);
@@ -166,10 +206,19 @@ public class RankCommand {
 	}
 	
 	private void setDisplayName(String[] args) {
+		if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.setdisplayname")) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            return;
+		}
 		if (args.length != 2) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.0.rank.setdisplayname"),
             		plugin.getSettingsManager().getCommandClan()));
             return;
+		}
+		
+		if (!clan.hasRank(args[0])) {
+			ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("rank.0.does.not.exist"), args[0]));
+			return;
 		}
 		Rank rank = clan.getRank(args[0]);
 		String dn = Helper.toMessage(Helper.removeFirst(args));
@@ -183,33 +232,63 @@ public class RankCommand {
 	}
 
 	private void permissions(String[] args) {
+		String validPermissionsToMessage = Helper.toMessage(Helper.fromPermissionArray(), ",");
+		if (args.length == 0) {
+			if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.permissions.available")) {
+	            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+	            return;
+			}
+			
+			ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("available.rank.permissions"));
+			ChatBlock.sendMessage(player, ChatColor.AQUA + validPermissionsToMessage);
+			return;
+		}
 		if (args.length > 0) {
 			String rank = args[0];
 			if (!clan.hasRank(rank)) {
-				ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("rank.does.not.exist"));
+				ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("rank.0.does.not.exist"), rank));
 				return;
 			}
 			Set<String> permissions = clan.getRank(rank).getPermissions();
 			
 			if (args.length == 1) {
-				// TODO Permissions vazia
+				if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.permissions.list")) {
+		            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+		            return;
+				}
+				if (permissions.isEmpty()) {
+					ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("rank.no.permissions"));
+					return;
+				}
 				ChatBlock.sendMessage(player, ChatColor.AQUA + MessageFormat.format(plugin.getLang("rank.0.permissions"), rank));
 				ChatBlock.sendMessage(player, ChatColor.AQUA + Helper.toMessage(permissions.toArray(new String[0]), ","));
 				return;
 			}
 			if (args.length == 3) {
 				String subCommand = args[1].toLowerCase();
-				String permission = args[2];
+				String permission = args[2].toLowerCase();
 				
 				boolean changed = false;
 				
 				switch (subCommand) {
 					case "add":
+						if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.permissions.add")) {
+				            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+				            return;
+						}
+						if (!RankPermission.isValid(permission)) {
+							ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("invalid.permission"), permission, validPermissionsToMessage));
+							return;
+						}
 						permissions.add(permission);
 						ChatBlock.sendMessage(player, ChatColor.AQUA + MessageFormat.format(plugin.getLang("permission.0.added.to.rank.1"), permission, rank));
 						changed = true;
 						break;
 					case "remove":
+						if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.rank.permissions.remove")) {
+				            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+				            return;
+						}
 						permissions.remove(permission);
 						ChatBlock.sendMessage(player, ChatColor.AQUA + MessageFormat.format(plugin.getLang("permission.0.removed.from.rank.1"), permission, rank));
 						changed = true;

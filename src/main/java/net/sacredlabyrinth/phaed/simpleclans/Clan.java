@@ -1159,6 +1159,7 @@ public class Clan implements Serializable, Comparable<Clan> {
         cp.setLeader(false);
         cp.setTrusted(false);
         cp.setJoinDate(0);
+        cp.setRank(null);
         removeMember(playerUniqueId);
 
         SimpleClans.getInstance().getStorageManager().updateClanPlayer(cp);
@@ -1961,10 +1962,12 @@ public class Clan implements Serializable, Comparable<Clan> {
 	 * @return a rank or null
 	 */
 	public Rank getRank(String name) {
-		for (Rank r : ranks) {
-			if (r.getName().equals(name)) {
-				return r;
-			}
+		if (name != null) {
+			for (Rank r : ranks) {
+				if (r.getName().equals(name)) {
+					return r;
+				}
+			}	
 		}
 		return null;
 	}
