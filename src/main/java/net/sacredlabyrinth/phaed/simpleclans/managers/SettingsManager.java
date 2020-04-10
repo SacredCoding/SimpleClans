@@ -36,7 +36,6 @@ public final class SettingsManager {
     private boolean showUnverifiedOnList;
     private boolean requireVerification;
     private boolean rejoinCooldownEnabled;
-    private boolean ranksWithPermissions;
     private int rejoinCooldown;
     private String listDefault;
     private String listSize;
@@ -238,7 +237,6 @@ public final class SettingsManager {
         requireVerification = getConfig().getBoolean("settings.new-clan-verification-required");
         rejoinCooldown = getConfig().getInt("settings.rejoin-cooldown");
         rejoinCooldownEnabled = getConfig().getBoolean("settings.rejoin-cooldown-enabled");
-        ranksWithPermissions = getConfig().getBoolean("settings.ranks-with-permissions");
         listActive = getConfig().getString("list.active", "active");
         listKdr = getConfig().getString("list.kdr", "kdr");
         listDefault = getConfig().getString("list.default", listKdr);
@@ -451,15 +449,6 @@ public final class SettingsManager {
 		this.tasksCollectFeeMinute = tasksCollectFeeMinute;
 	}
 	
-	/**
-	 * Returns if ranks can have permissions
-	 * 
-	 * @return
-	 */
-	public boolean isRanksWithPermissions() {
-		return ranksWithPermissions;
-	}
-
 	/**
      * Returns the delay between kills
      * 

@@ -47,7 +47,6 @@ settings:
     allow-reset-kdr: false
     rejoin-cooldown: 60
     rejoin-cooldown-enabled: false
-    ranks-with-permissions: false
 kdr-grinding-prevention:
     enable-max-kills: false
     max-kills-per-victim: 10
