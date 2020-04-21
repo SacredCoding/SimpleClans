@@ -99,7 +99,7 @@ public final class RequestManager {
      * @param clan
      */
     public void addInviteRequest(ClanPlayer requester, String invitedName, Clan clan) {
-        String msg = MessageFormat.format(plugin.getLang("inviting.you.to.join"), Helper.capitalize(requester.getName()), clan.getName());
+        String msg = MessageFormat.format(plugin.getLang("inviting.you.to.join"), requester.getName(), clan.getName());
         Request req = new Request(plugin, ClanRequest.INVITE, null, requester, invitedName, clan, msg);
         requests.put(invitedName.toLowerCase(), req);
         ask(req);
