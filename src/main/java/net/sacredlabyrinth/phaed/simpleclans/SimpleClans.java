@@ -97,7 +97,7 @@ public class SimpleClans extends JavaPlugin {
         clanManager = new ClanManager();
         storageManager = new StorageManager();
         teleportManager = new TeleportManager();
-        placeholdersManager = new PlaceholdersManager();
+        placeholdersManager = new PlaceholdersManager(this);
         chatFormatMigration = new ChatFormatMigration();
 
         chatFormatMigration.migrateAllyChat();
