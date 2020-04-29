@@ -124,6 +124,7 @@ public final class SettingsManager {
     private String allyChatRank;
     private String allyChatLeaderColor;
     private String allyChatMemberColor;
+    private String allyChatTrustedColor;
     private String allyChatMessageColor;
     private String allyChatNameColor;
     private String allyChatTagColor;
@@ -136,6 +137,7 @@ public final class SettingsManager {
     private String clanChatFormat;
     private String clanChatRank;
     private String clanChatLeaderColor;
+    private String clanChatTrustedColor;
     private String clanChatMemberColor;
     private String clanChatAnnouncementColor;
     private String clanChatMessageColor;
@@ -200,8 +202,7 @@ public final class SettingsManager {
     /**
      * Load the configuration
      */
-
-    @SuppressWarnings({"CallToPrintStackTrace", "UseSpecificCatch"})
+    
     public void load() {
         boolean exists = (main).exists();
 
@@ -326,6 +327,7 @@ public final class SettingsManager {
         allyChatFormat = getConfig().getString("allychat.format");
         allyChatRank = getConfig().getString("allychat.rank");
         allyChatLeaderColor = getConfig().getString("allychat.leader-color");
+        allyChatTrustedColor = getConfig().getString("allychat.trusted-color");
         allyChatMemberColor = getConfig().getString("allychat.member-color");
         allyChatMessageColor = getConfig().getString("allychat.message-color");
         allyChatTagColor = getConfig().getString("allychat.tag-color");
@@ -339,6 +341,7 @@ public final class SettingsManager {
         clanChatFormat = getConfig().getString("clanchat.format");
         clanChatRank = getConfig().getString("clanchat.rank");
         clanChatLeaderColor = getConfig().getString("clanchat.leader-color");
+        clanChatTrustedColor = getConfig().getString("clanchat.trusted-color");
         clanChatMemberColor = getConfig().getString("clanchat.member-color");
         tagBasedClanChat = getConfig().getBoolean("clanchat.tag-based-clan-chat");
         clanChatAnnouncementColor = getConfig().getString("clanchat.announcement-color");
@@ -394,7 +397,6 @@ public final class SettingsManager {
         save();
     }
 
-    @SuppressWarnings("CallToPrintStackTrace")
     public void save() {
         try {
             getConfig().save(main);
@@ -1067,6 +1069,10 @@ public final class SettingsManager {
         return Helper.toColor(clanChatLeaderColor);
     }
     
+    public String getClanChatTrustedColor() {
+		return Helper.toColor(clanChatTrustedColor);
+	}
+    
     public String getClanChatMemberColor() {
         return Helper.toColor(clanChatMemberColor);
     }
@@ -1369,6 +1375,10 @@ public final class SettingsManager {
     public String getAllyChatLeaderColor() {
         return Helper.toColor(allyChatLeaderColor);
     }
+    
+    public String getAllyChatTrustedColor() {
+		return Helper.toColor(allyChatTrustedColor);
+	}
     
     public String getAllyChatMemberColor() {
         return Helper.toColor(allyChatMemberColor);

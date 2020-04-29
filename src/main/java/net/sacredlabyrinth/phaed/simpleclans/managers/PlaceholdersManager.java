@@ -2,6 +2,7 @@ package net.sacredlabyrinth.phaed.simpleclans.managers;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
@@ -30,33 +31,57 @@ public final class PlaceholdersManager {
 	public static final char NEW_LINE = '\n';
 	
 	/**
+	 * Boolean to check if there was a hook into {@link PlaceholderAPI}
+	 * 
+	 * @since 2.10.1
+	 */
+	
+	private static boolean hasPAPI;
+	
+	/**
+	 * The {@link SimpleClans} {@link Plugin} instance
+	 * 
+	 * @since 2.10.1
+	 */
+	
+	private SimpleClans plugin;
+	
+	/**
 	 * The {@link PlaceholdersManager} constructor
 	 * 
 	 * @since 2.10.1
 	 */
 	
-	public PlaceholdersManager() {
-		try {
-			Class.forName("me.clip.placeholderapi.PlaceholderAPI");
+	public PlaceholdersManager(SimpleClans plugin) {
+		this.plugin = plugin;
+		
+		if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+			setupPlaceholderAPI();
+		}
+	}
+	
+	/**
+	 * Method to setup the {@link PlaceholderAPI} hook
+	 * 
+	 * @since 2.10.1
+	 */
+	
+	private void setupPlaceholderAPI() {
+		PlaceholderAPI.registerPlaceholderHook(plugin.getName(), new PlaceholderHook() {
 			
-			PlaceholderAPI.registerPlaceholderHook(SimpleClans.getInstance().getName(), new PlaceholderHook() {
+			@Override
+			public String onPlaceholderRequest(Player player, String identifier) {
+				return onRequest(player, identifier);
+			}
+			
+			@Override
+			public String onRequest(OfflinePlayer player, String identifier) {
+				if (player == null) return "";
 				
-				@Override
-				public String onPlaceholderRequest(Player player, String identifier) {
-					return onRequest(player, identifier);
-				}
-				
-				@Override
-				public String onRequest(OfflinePlayer player, String identifier) {
-					if (player == null) return "";
-					
-					return setPlaceholders(SimpleClans.getInstance().getClanManager().getClanPlayer(player), identifier);
-				}
-			});
-		}
-		catch(ClassNotFoundException e) {
-			 SimpleClans.log("[SimpleClans] PlaceholderAPI not found. No placeholders support.");
-		}
+				return setPlaceholders(SimpleClans.getInstance().getClanManager().getClanPlayer(player), identifier);
+			}
+		});
+		hasPAPI = true;
 	}
 	
 	/**
@@ -68,7 +93,7 @@ public final class PlaceholdersManager {
 	 */
 	
 	public static String booleanTrue() {
-		return PlaceholderAPIPlugin.booleanTrue();
+		return hasPAPI ? PlaceholderAPIPlugin.booleanTrue() : "true";
 	}
 	
 	/**
@@ -80,7 +105,7 @@ public final class PlaceholdersManager {
 	 */
 	
 	public static String booleanFalse() {
-		return PlaceholderAPIPlugin.booleanFalse();
+		return hasPAPI ? PlaceholderAPIPlugin.booleanFalse() : "false";
 	}
 	
 	/**
@@ -96,6 +121,8 @@ public final class PlaceholdersManager {
 	
 	public String setPlaceholders(ClanPlayer player, String identifier) {
 		if (player == null) return "";
+		
+		Clan clan = player.getClan();
 		
 		switch (identifier) {
 			case "neutral_kills": {
@@ -120,7 +147,7 @@ public final class PlaceholdersManager {
 				return String.valueOf(player.getKDR());
 			}
 			case "in_clan": {
-				return (player.getClan() != null) ? booleanTrue() : booleanFalse();
+				return (clan != null) ? booleanTrue() : booleanFalse();
 			}
 			case "is_leader": {
 				return player.isLeader() ? booleanTrue() : booleanFalse();
@@ -129,7 +156,7 @@ public final class PlaceholdersManager {
 				return (!player.isLeader() && player.isTrusted()) ? booleanTrue() : booleanFalse();
 			}
 			case "is_member": {
-				return (!player.isTrusted() && !player.isLeader() && player.getClan() != null) ? booleanTrue() : booleanFalse();
+				return (!player.isTrusted() && !player.isLeader() && clan != null) ? booleanTrue() : booleanFalse();
 			}
 			case "is_bb_enabled": {
 				return player.isBbEnabled() ? booleanTrue() : booleanFalse();
@@ -185,88 +212,98 @@ public final class PlaceholdersManager {
 			case "rank_displayname": {
 				return player.getRankDisplayName();
 			}
+			case "clanchat_player_color": {
+				if (player.isLeader()) return plugin.getSettingsManager().getClanChatLeaderColor();
+				if (player.isTrusted()) return plugin.getSettingsManager().getClanChatTrustedColor();
+				if (clan != null) return plugin.getSettingsManager().getClanChatMemberColor();
+				return "";
+			}
+			case "allychat_player_color": {
+				if (player.isLeader()) return plugin.getSettingsManager().getAllyChatLeaderColor();
+				if (player.isTrusted()) return plugin.getSettingsManager().getAllyChatTrustedColor();
+				if (clan != null) return plugin.getSettingsManager().getAllyChatMemberColor();
+				return "";
+			}
 			default:
 				break;
 		}
-		Clan c = player.getClan();
-		
-		if (c == null) return "";
+		if (clan == null) return "";
 		
 		switch (identifier) {
 			case "clan_total_neutral": {
-				return String.valueOf(c.getTotalNeutral());
+				return String.valueOf(clan.getTotalNeutral());
 			}
 			case "clan_total_civilian": {
-				return String.valueOf(c.getTotalCivilian());
+				return String.valueOf(clan.getTotalCivilian());
 			}
 			case "clan_total_rival": {
-				return String.valueOf(c.getTotalRival());
+				return String.valueOf(clan.getTotalRival());
 			}
 			case "clan_total_kills": {
-				return String.valueOf(c.getTotalRival() + c.getTotalNeutral() + c.getTotalCivilian());
+				return String.valueOf(clan.getTotalRival() + clan.getTotalNeutral() + clan.getTotalCivilian());
 			}
 			case "clan_total_deaths": {
-				return String.valueOf(c.getTotalDeaths());
+				return String.valueOf(clan.getTotalDeaths());
 			}
 			case "clan_total_kdr": {
-				return String.valueOf(c.getTotalKDR());
+				return String.valueOf(clan.getTotalKDR());
 			}
 			case "clan_average_wk": {
-				return String.valueOf(c.getAverageWK());
+				return String.valueOf(clan.getAverageWK());
 			}
 			case "clan_leader_size": {
-				return String.valueOf(c.getLeaders().size());
+				return String.valueOf(clan.getLeaders().size());
 			}
 			case "clan_balance": {
-				return String.valueOf(c.getBalance());
+				return String.valueOf(clan.getBalance());
 			}
 			case "clan_allow_withdraw": {
-				return c.isAllowWithdraw() ? booleanTrue() : booleanFalse();
+				return clan.isAllowWithdraw() ? booleanTrue() : booleanFalse();
 			}
 			case "clan_allow_deposit": {
-				return c.isAllowDeposit() ? booleanTrue() : booleanFalse();
+				return clan.isAllowDeposit() ? booleanTrue() : booleanFalse();
 			}
 			case "clan_size": {
-				return String.valueOf(c.getSize());
+				return String.valueOf(clan.getSize());
 			}
 			case "clan_name": {
-				return c.getName();
+				return clan.getName();
 			}
 			case "clan_color_tag": {
-				return c.getColorTag();
+				return clan.getColorTag();
 			}
 			case "clan_tag": {
-				return c.getTag();
+				return clan.getTag();
 			}
 			case "clan_founded": {
-				return c.getFoundedString();
+				return clan.getFoundedString();
 			}
 			case "clan_friendly_fire": {
-				return c.isFriendlyFire() ? booleanTrue() : booleanFalse();
+				return clan.isFriendlyFire() ? booleanTrue() : booleanFalse();
 			}
 			case "clan_is_unrivable": {
-				return c.isUnrivable() ? booleanTrue() : booleanFalse();
+				return clan.isUnrivable() ? booleanTrue() : booleanFalse();
 			}
 			case "clan_is_anyonline": {
-				return c.isAnyOnline() ? booleanTrue() : booleanFalse();
+				return clan.isAnyOnline() ? booleanTrue() : booleanFalse();
 			}
 			case "clan_is_verified": {
-				return c.isVerified() ? booleanTrue() : booleanFalse();
+				return clan.isVerified() ? booleanTrue() : booleanFalse();
 			}
 			case "clan_capeurl": {
-				return c.getCapeUrl();
+				return clan.getCapeUrl();
 			}
 			case "clan_inactivedays": {
-				return String.valueOf(c.getInactiveDays());
+				return String.valueOf(clan.getInactiveDays());
 			}
 			case "clan_onlinemembers_count": {
-				return String.valueOf(c.getOnlineMembers().size());
+				return String.valueOf(clan.getOnlineMembers().size());
 			}
 			case "clan_allies_count": {
-				return String.valueOf(c.getAllies().size());
+				return String.valueOf(clan.getAllies().size());
 			}
 			case "clan_rivals_count": {
-				return String.valueOf(c.getRivals().size());
+				return String.valueOf(clan.getRivals().size());
 			}
 			default:
 				break;
