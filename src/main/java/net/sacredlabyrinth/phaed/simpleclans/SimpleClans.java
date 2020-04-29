@@ -24,6 +24,7 @@ import net.sacredlabyrinth.phaed.simpleclans.listeners.SCPlayerListener;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
 import net.sacredlabyrinth.phaed.simpleclans.managers.LanguageManager;
 import net.sacredlabyrinth.phaed.simpleclans.managers.PermissionsManager;
+import net.sacredlabyrinth.phaed.simpleclans.managers.PlaceholdersManager;
 import net.sacredlabyrinth.phaed.simpleclans.managers.RequestManager;
 import net.sacredlabyrinth.phaed.simpleclans.managers.SettingsManager;
 import net.sacredlabyrinth.phaed.simpleclans.managers.StorageManager;
@@ -48,6 +49,7 @@ public class SimpleClans extends JavaPlugin {
     private PermissionsManager permissionsManager;
     private TeleportManager teleportManager;
     private LanguageManager languageManager;
+    private PlaceholdersManager placeholdersManager;
     private ChatFormatMigration chatFormatMigration;
     private boolean hasUUID;
 
@@ -95,6 +97,7 @@ public class SimpleClans extends JavaPlugin {
         clanManager = new ClanManager();
         storageManager = new StorageManager();
         teleportManager = new TeleportManager();
+        placeholdersManager = new PlaceholdersManager();
         chatFormatMigration = new ChatFormatMigration();
 
         chatFormatMigration.migrateAllyChat();
@@ -226,6 +229,10 @@ public class SimpleClans extends JavaPlugin {
     public List<String> getMessages() {
         return messages;
     }
+
+    public PlaceholdersManager getPlaceholdersManager() {
+		return placeholdersManager;
+	}
 
     /**
      * @return the hasUUID
