@@ -5,15 +5,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import me.clip.placeholderapi.PlaceholderAPI;
-import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.PlaceholderHook;
 
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 
+import static me.clip.placeholderapi.PlaceholderAPIPlugin.booleanFalse;
+import static me.clip.placeholderapi.PlaceholderAPIPlugin.booleanTrue;
+
 /**
- * {@link Class} to manage and hook the {@link SimpleClans} placeholders
+ * {@link Class} to manage and hook {@link SimpleClans} into {@link PlaceholderAPI}
  * 
  * @since 2.10.1
  * 
@@ -21,22 +23,6 @@ import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
  */
 
 public final class PlaceholdersManager {
-	
-	/**
-	 * The char to create a new line
-	 * 
-	 * @since 2.10.1
-	 */
-	
-	public static final char NEW_LINE = '\n';
-	
-	/**
-	 * Boolean to check if there was a hook into {@link PlaceholderAPI}
-	 * 
-	 * @since 2.10.1
-	 */
-	
-	private static boolean hasPAPI;
 	
 	/**
 	 * The {@link SimpleClans} {@link Plugin} instance
@@ -54,21 +40,18 @@ public final class PlaceholdersManager {
 	
 	public PlaceholdersManager(SimpleClans plugin) {
 		this.plugin = plugin;
-		
-		if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
-			setupPlaceholderAPI();
-		}
+		setupPlaceholderAPI();
 	}
 	
 	/**
-	 * Method to setup the {@link PlaceholderAPI} hook
+	 * Registers the {@link PlaceholderAPI} hook
 	 * 
 	 * @since 2.10.1
 	 */
 	
 	private void setupPlaceholderAPI() {
 		PlaceholderAPI.registerPlaceholderHook(plugin.getName(), new PlaceholderHook() {
-			
+
 			@Override
 			public String onPlaceholderRequest(Player player, String identifier) {
 				return onRequest(player, identifier);
@@ -78,48 +61,23 @@ public final class PlaceholdersManager {
 			public String onRequest(OfflinePlayer player, String identifier) {
 				if (player == null) return "";
 				
-				return setPlaceholders(SimpleClans.getInstance().getClanManager().getClanPlayer(player), identifier);
+				return getPlaceholderValue(SimpleClans.getInstance().getClanManager().getAnyClanPlayer(player.getUniqueId()), identifier);
 			}
 		});
-		hasPAPI = true;
 	}
 	
 	/**
-	 * Get the true value from the PlaceholderAPI config
-	 * 
-	 * @return The true value from the PlaceholderAPI config
-	 * 
-	 * @since 2.10.1
-	 */
-	
-	public static String booleanTrue() {
-		return hasPAPI ? PlaceholderAPIPlugin.booleanTrue() : "true";
-	}
-	
-	/**
-	 * Get the false value from the PlaceholderAPI config
-	 * 
-	 * @return The false value from the PlaceholderAPI config
-	 * 
-	 * @since 2.10.1
-	 */
-	
-	public static String booleanFalse() {
-		return hasPAPI ? PlaceholderAPIPlugin.booleanFalse() : "false";
-	}
-	
-	/**
-	 * Abstract method to get a playerholder for a {@link ClanPlayer}
+	 * Gets a value for the requested {@link ClanPlayer} and identifier
 	 * 
 	 * @param player The {@link ClanPlayer} to request the placeholders value for
 	 * @param identifier String that determine what value to return
 	 * 
-	 * @return value for the requested player and params
+	 * @return value for the requested {@link ClanPlayer} and params
 	 * 
 	 * @since 2.10.1
 	 */
 	
-	public String setPlaceholders(ClanPlayer player, String identifier) {
+	public String getPlaceholderValue(ClanPlayer player, String identifier) {
 		if (player == null) return "";
 		
 		Clan clan = player.getClan();
@@ -207,7 +165,7 @@ public final class PlaceholdersManager {
 				return player.getTagLabel();
 			}
 			case "rank": {
-				return player.getRank();
+				return player.getRankId();
 			}
 			case "rank_displayname": {
 				return player.getRankDisplayName();

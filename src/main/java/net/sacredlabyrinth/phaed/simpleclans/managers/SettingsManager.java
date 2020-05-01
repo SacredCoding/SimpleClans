@@ -123,8 +123,8 @@ public final class SettingsManager {
     private String allyChatFormat;
     private String allyChatRank;
     private String allyChatLeaderColor;
-    private String allyChatMemberColor;
     private String allyChatTrustedColor;
+    private String allyChatMemberColor;
     private String allyChatMessageColor;
     private String allyChatNameColor;
     private String allyChatTagColor;
@@ -202,7 +202,8 @@ public final class SettingsManager {
     /**
      * Load the configuration
      */
-    
+
+    @SuppressWarnings({"CallToPrintStackTrace", "UseSpecificCatch"})
     public void load() {
         boolean exists = (main).exists();
 
@@ -397,6 +398,7 @@ public final class SettingsManager {
         save();
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     public void save() {
         try {
             getConfig().save(main);
@@ -1070,8 +1072,8 @@ public final class SettingsManager {
     }
     
     public String getClanChatTrustedColor() {
-		return Helper.toColor(clanChatTrustedColor);
-	}
+ 		return Helper.toColor(clanChatTrustedColor);
+ 	}
     
     public String getClanChatMemberColor() {
         return Helper.toColor(clanChatMemberColor);
