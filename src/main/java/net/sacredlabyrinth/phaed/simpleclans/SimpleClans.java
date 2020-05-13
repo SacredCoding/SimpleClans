@@ -32,6 +32,7 @@ import net.sacredlabyrinth.phaed.simpleclans.tasks.CollectFeeTask;
 import net.sacredlabyrinth.phaed.simpleclans.tasks.CollectUpkeepTask;
 import net.sacredlabyrinth.phaed.simpleclans.tasks.SaveDataTask;
 import net.sacredlabyrinth.phaed.simpleclans.tasks.UpkeepWarningTask;
+import net.sacredlabyrinth.phaed.simpleclans.ui.InventoryController;
 import net.sacredlabyrinth.phaed.simpleclans.uuid.UUIDMigration;
 
 /**
@@ -100,11 +101,10 @@ public class SimpleClans extends JavaPlugin {
 
         chatFormatMigration.migrateAllyChat();
         chatFormatMigration.migrateClanChat();
-
-        getLogger().info(MessageFormat.format(getLang("version.loaded"), getDescription().getName(), getDescription().getVersion()));
-
+        
         getServer().getPluginManager().registerEvents(new SCEntityListener(), this);
         getServer().getPluginManager().registerEvents(new SCPlayerListener(), this);
+        getServer().getPluginManager().registerEvents(new InventoryController(), this);
 
         permissionsManager.loadPermissions();
 
