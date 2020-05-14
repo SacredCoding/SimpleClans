@@ -30,18 +30,7 @@ public class InventoryController implements Listener {
 			return;
 		}
 		
-		SCFrame frame = frames.get(entity.getUniqueId());
-		if (frame == null) {
-			return;
-		}
-		
-		SCFrame parent = frame.getParent();
-		if (parent == null) {
-			frames.remove(entity.getUniqueId());
-			return;
-		}
-		
-		InventoryDrawer.open(parent);
+		frames.remove(entity.getUniqueId());
 	}
 
 	@EventHandler(ignoreCancelled = true)

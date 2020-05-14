@@ -57,16 +57,6 @@ public class MainFrame implements SCFrame {
 	}
 
 	@Override
-	public SCComponent getComponent(int index) {
-		for (SCComponent c : components) {
-			if (c.getSlot() == index) {
-				return c;
-			}
-		}
-		return null;
-	}
-
-	@Override
 	public Set<SCComponent> getComponents() {
 		return components;
 	}

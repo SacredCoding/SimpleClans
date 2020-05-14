@@ -8,6 +8,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bstats.bukkit.Metrics;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -238,8 +239,11 @@ public class SimpleClans extends JavaPlugin {
     	} else {
     		locale = Helper.getLocale(player);
     	}
-    	
-    	return new LanguageResource().getLang(key, locale);
+    	return ChatColor.translateAlternateColorCodes('&', new LanguageResource().getLang(key, locale));
+    }
+    
+    public String getLangFormatted(String key, Object... arguments) {
+    	return MessageFormat.format(getLang(key), arguments);
     }
 
     public TeleportManager getTeleportManager() {

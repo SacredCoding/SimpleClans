@@ -10,17 +10,26 @@ import org.bukkit.entity.Player;
  *
  */
 public interface SCFrame {
-	
+
 	String getTitle();
-	
+
 	Player getViewer();
-	
+
 	SCFrame getParent();
-	
+
 	int getSize();
-	
-	SCComponent getComponent(int slot);
-	
+
+	default SCComponent getComponent(int slot) {
+		if (getComponents() != null) {
+			for (SCComponent c : getComponents()) {
+				if (c.getSlot() == slot) {
+					return c;
+				}
+			}
+		}
+		return null;
+	}
+
 	Set<SCComponent> getComponents();
-	
+
 }

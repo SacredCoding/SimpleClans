@@ -28,6 +28,10 @@ public class InventoryDrawer {
 	}
 
 	private static void setComponents(Inventory inventory, SCFrame frame) {
+		if (frame.getComponents() == null || frame.getComponents().isEmpty()) {
+			SimpleClans.getInstance().getLogger().warning(String.format("Frame %s has no components", frame.getTitle()));
+			return;
+		}
 		for (SCComponent c : frame.getComponents()) {
 			if (c.getSlot() >= frame.getSize()) {
 				continue;
