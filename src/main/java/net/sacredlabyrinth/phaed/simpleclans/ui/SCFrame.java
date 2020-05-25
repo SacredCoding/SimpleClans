@@ -1,35 +1,66 @@
 package net.sacredlabyrinth.phaed.simpleclans.ui;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * 
  * @author RoinujNosde
  *
  */
-public interface SCFrame {
+public abstract class SCFrame {
 
-	String getTitle();
+	private final SCFrame parent;
+	private final Player viewer;
+	private final Set<SCComponent> components = new HashSet<>();
+	
+	public SCFrame(@Nullable SCFrame parent, @NotNull Player viewer) {
+		this.parent = parent;
+		this.viewer = viewer;
+	}
 
-	Player getViewer();
+	@NotNull
+	public abstract String getTitle();
 
-	SCFrame getParent();
+	@NotNull
+	public Player getViewer() {
+		return viewer;
+	}
 
-	int getSize();
+	@Nullable
+	public SCFrame getParent() {
+		return parent;
+	}
 
-	default SCComponent getComponent(int slot) {
-		if (getComponents() != null) {
-			for (SCComponent c : getComponents()) {
-				if (c.getSlot() == slot) {
-					return c;
-				}
+	public abstract int getSize();
+
+	public abstract void createComponents();
+
+	@Nullable
+	public SCComponent getComponent(int slot) {
+		for (SCComponent c : getComponents()) {
+			if (c.getSlot() == slot) {
+				return c;
 			}
 		}
 		return null;
 	}
+	
+	public void add(@NotNull SCComponent c) {
+		components.add(c);
+	}
+	
+	public void clear() {
+		components.clear();
+	}
 
-	Set<SCComponent> getComponents();
+	@NotNull
+	public Set<SCComponent> getComponents() {
+		return components;
+	}
 
 }

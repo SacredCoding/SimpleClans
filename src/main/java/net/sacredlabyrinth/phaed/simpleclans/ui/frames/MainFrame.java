@@ -1,64 +1,62 @@
 package net.sacredlabyrinth.phaed.simpleclans.ui.frames;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
+import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
+import net.sacredlabyrinth.phaed.simpleclans.ui.*;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.jetbrains.annotations.NotNull;
 
-import net.sacredlabyrinth.phaed.simpleclans.ui.InventoryController;
-import net.sacredlabyrinth.phaed.simpleclans.ui.InventoryDrawer;
-import net.sacredlabyrinth.phaed.simpleclans.ui.SCComponent;
-import net.sacredlabyrinth.phaed.simpleclans.ui.SCComponentImpl;
-import net.sacredlabyrinth.phaed.simpleclans.ui.SCFrame;
+import java.util.Collections;
 
-public class MainFrame implements SCFrame {
+import static net.sacredlabyrinth.phaed.simpleclans.SimpleClans.lang;
 
-	private HashSet<SCComponent> components = new HashSet<>();
-	private Player player;
+public class MainFrame extends SCFrame {
 
-	public MainFrame(Player player) {
-		this.player = player;
-		createComponents();
-	}
+	private final SimpleClans plugin = SimpleClans.getInstance();
 
-	private void createComponents() {
-		SCComponent leaderboard = new SCComponentImpl("Leaderboard", Arrays.asList("Shows the leaderboard"), Material.PAINTING, 4,
-				"simpleclans.anyone.leaderboard", null);
-		leaderboard.setLeftClickListener(() -> InventoryDrawer.open(new LeaderboardFrame(player, this)));
-		components.add(leaderboard);
-		
-		SCComponent resetKdr = new SCComponentImpl("Reset KDR", Arrays.asList(String.format("Click here to reset your KDR%nTeste")), Material.RED_WOOL, 6,
-				"simpleclans.member.resetkdr", null);
-		resetKdr.setLeftClickListener(() -> InventoryController.runSubcommand(player, "resetkdr"));
-		components.add(resetKdr);
-		
-	}
-	
-	@Override
-	public Player getViewer() {
-		return player;
+	public MainFrame(Player viewer) {
+		super(null, viewer);
 	}
 
 	@Override
-	public String getTitle() {
-		return "Teste";
+	public void createComponents() {
+		add(Components.getPlayerComponent(this, getViewer(), getViewer(), 0, false));
+		add(Components.getClanComponent(this, getViewer(),
+				plugin.getClanManager().getCreateClanPlayer(getViewer().getUniqueId()).getClan(), 1, true));
+
+		SCComponent leaderboard = new SCComponentImpl(lang("gui.main.leaderboard.title"),
+				Collections.singletonList(lang("gui.main.leaderboard.lore")), Material.PAINTING, 3);
+		leaderboard.setListener(ClickType.LEFT, () -> InventoryDrawer.open(new LeaderboardFrame(getViewer(), this)));
+		leaderboard.setPermission(ClickType.LEFT, "simpleclans.anyone.leaderboard");
+		add(leaderboard);
+
+		SCComponent clanList = new SCComponentImpl(lang("gui.main.clan.list.title"),
+				Collections.singletonList(lang("gui.main.clan.list.lore")), Material.PURPLE_BANNER, 4);
+		clanList.setListener(ClickType.LEFT, () -> InventoryDrawer.open(new ClanListFrame(this, getViewer())));
+		clanList.setPermission(ClickType.LEFT, "simpleclans.anyone.list");
+		add(clanList);
+
+		SCComponent resetKdr = new SCComponentImpl(lang("gui.main.reset.kdr.title"),
+				Collections.singletonList(lang("gui.main.reset.kdr.lore")), Material.ANVIL, 6);
+		resetKdr.setListener(ClickType.LEFT, () -> InventoryController.runSubcommand(getViewer(), "resetkdr", false));
+		resetKdr.setPermission(ClickType.LEFT, "simpleclans.member.resetkdr");
+		add(resetKdr);
+
+		SCComponent otherCommands = new SCComponentImpl(lang("gui.main.other.commands.title"),
+				Collections.singletonList(lang("gui.main.other.commands.lore")), Material.BOOK, 8);
+		otherCommands.setListener(ClickType.LEFT, () -> InventoryController.runSubcommand(getViewer(), "help", false));
+		add(otherCommands);
 	}
 
 	@Override
-	public SCFrame getParent() {
-		return null;
+	public @NotNull String getTitle() {
+		return lang("gui.main.title");
 	}
 
 	@Override
 	public int getSize() {
 		return 9;
-	}
-
-	@Override
-	public Set<SCComponent> getComponents() {
-		return components;
 	}
 
 }

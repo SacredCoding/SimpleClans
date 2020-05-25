@@ -2,17 +2,16 @@ package net.sacredlabyrinth.phaed.simpleclans.ui.frames;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.inventory.meta.SkullMeta;
 
-import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
-import net.sacredlabyrinth.phaed.simpleclans.Helper;
+import net.sacredlabyrinth.phaed.simpleclans.Clan;
+import net.sacredlabyrinth.phaed.simpleclans.RankPermission;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
+import net.sacredlabyrinth.phaed.simpleclans.ui.InventoryController;
 import net.sacredlabyrinth.phaed.simpleclans.ui.InventoryDrawer;
 import net.sacredlabyrinth.phaed.simpleclans.ui.SCComponent;
 import net.sacredlabyrinth.phaed.simpleclans.ui.SCComponentImpl;
@@ -22,16 +21,18 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.sacredlabyrinth.phaed.simpleclans.SimpleClans.lang;
 
-public class LeaderboardFrame extends SCFrame {
+public class AddRivalFrame extends SCFrame {
+	private final SimpleClans plugin = SimpleClans.getInstance();
 
+	private final List<Clan> notRivals;
 	private final Paginator paginator;
-	private final List<ClanPlayer> clanPlayers = SimpleClans.getInstance().getClanManager().getAllClanPlayers();
 
-	public LeaderboardFrame(Player viewer, SCFrame parent) {
+	public AddRivalFrame(SCFrame parent, Player viewer, Clan subject) {
 		super(parent, viewer);
-		paginator = new Paginator(getSize() - 9, clanPlayers.size());
-		SimpleClans plugin = SimpleClans.getInstance();
-		plugin.getClanManager().sortClanPlayersByKDR(clanPlayers);
+		notRivals = plugin.getClanManager().getClans().stream()
+				.filter(c -> !c.equals(subject) && !c.isRival(subject.getTag()) && !c.isAlly(subject.getTag()))
+				.collect(Collectors.toList());
+		paginator = new Paginator(getSize() - 9, notRivals.size());
 	}
 
 	@Override
@@ -48,25 +49,15 @@ public class LeaderboardFrame extends SCFrame {
 
 		int slot = 9;
 		for (int i = paginator.getMinIndex(); paginator.isValidIndex(i); i++) {
-			ClanPlayer cp = clanPlayers.get(i);
+
+			Clan notRival = notRivals.get(i);
 			SCComponent c = new SCComponentImpl(
-					lang("gui.leaderboard.player.title", i + 1, cp.getName()),
-					Arrays.asList(
-							cp.getClan() == null ? lang("gui.playerdetails.player.lore.noclan")
-									: lang("gui.playerdetails.player.lore.clan",
-											cp.getClan().getColorTag(), cp.getClan().getName()),
-							lang("gui.playerdetails.player.lore.kdr", Helper.formatKDR(cp.getKDR())),
-							lang("gui.playerdetails.player.lore.last.seen", cp.getLastSeenString())),
-					Material.PLAYER_HEAD, slot);
-			SkullMeta itemMeta = (SkullMeta) c.getItemMeta();
-			OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(cp.getUniqueId());
-			if (itemMeta != null) {
-				itemMeta.setOwningPlayer(offlinePlayer);
-				c.setItemMeta(itemMeta);
-			}
-			c.setListener(ClickType.LEFT,
-					() -> InventoryDrawer.open(new PlayerDetailsFrame(getViewer(), this, offlinePlayer)));
-			c.setLorePermission("simpleclans.anyone.leaderboard");
+					lang("gui.clanlist.clan.title", notRival.getColorTag(), notRival.getName()),
+					Arrays.asList(lang("gui.add.rival.clan.lore")), Material.RED_BANNER, slot);
+
+			c.setListener(ClickType.LEFT, () -> InventoryController.runSubcommand(getViewer(),
+					String.format("rival %s %s", lang("add"), notRival.getTag()), false));
+			c.setPermission(ClickType.LEFT, RankPermission.RIVAL_ADD);
 			add(c);
 			slot++;
 		}
@@ -90,12 +81,11 @@ public class LeaderboardFrame extends SCFrame {
 
 	@Override
 	public @NotNull String getTitle() {
-		return lang("gui.leaderboard.title", clanPlayers.size());
+		return lang("gui.add.rival.title");
 	}
 
 	@Override
 	public int getSize() {
 		return 6 * 9;
 	}
-
 }

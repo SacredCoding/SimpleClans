@@ -1,66 +1,84 @@
 package net.sacredlabyrinth.phaed.simpleclans.ui;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import net.sacredlabyrinth.phaed.simpleclans.PermissionLevel;
 import net.sacredlabyrinth.phaed.simpleclans.RankPermission;
 
 /**
- * 
+ * Class that represents a button
+ *
  * @author RoinujNosde
  *
  */
 public abstract class SCComponent {
-	
-	private Runnable rightClickListener;
-	private Runnable leftClickListener;
-	private Runnable middleClickListener;
-	
+
+	private final HashMap<ClickType, Runnable> listeners = new HashMap<>();
+	private final HashMap<ClickType, Object> permissions = new HashMap<>();
+	private final Set<ClickType> verified = new HashSet<>();
+	private Object lorePermission;
+
+	@NotNull
 	public abstract ItemStack getItem();
-	
+
 	public abstract int getSlot();
-	
-	public abstract RankPermission getRankPermission();
-	
-	public abstract String getBukkitPermission();
-	
-	public abstract PermissionLevel getPermissionLevel();
-	
+
+	@Nullable
 	public ItemMeta getItemMeta() {
-		if (getItem() != null) {
-			return getItem().getItemMeta();
-		}
-		return null;
-	}
-	
-	public void setItemMeta(ItemMeta itemMeta) {
-		if (getItem() != null) {
-			getItem().setItemMeta(itemMeta);
-		}
-	}
-	
-	public Runnable getRightClickListener() {
-		return rightClickListener;
+		return getItem().getItemMeta();
 	}
 
-	public void setRightClickListener(Runnable listener) {
-		this.rightClickListener = listener;
+	public void setItemMeta(@NotNull ItemMeta itemMeta) {
+		getItem().setItemMeta(itemMeta);
 	}
 
-	public Runnable getLeftClickListener() {
-		return leftClickListener;
+	public void setVerifiedOnly(@NotNull ClickType clickType) {
+		verified.add(clickType);
 	}
 
-	public void setLeftClickListener(Runnable listener) {
-		this.leftClickListener = listener;
+	public boolean isVerifiedOnly(@NotNull ClickType clickType) {
+		return verified.contains(clickType);
 	}
 
-	public Runnable getMiddleClickListener() {
-		return middleClickListener;
+	public void setLorePermission(@Nullable RankPermission permission) {
+		lorePermission = permission;
 	}
 
-	public void setMiddleClickListener(Runnable listener) {
-		this.middleClickListener = listener;
+	public void setLorePermission(@Nullable String permission) {
+		lorePermission = permission;
+	}
+
+	@Nullable
+	public Object getLorePermission() {
+		return lorePermission;
+	}
+
+	public void setPermission(@NotNull ClickType click, @Nullable RankPermission permission) {
+		permissions.put(click, permission);
+	}
+
+	public void setPermission(@NotNull ClickType click, @Nullable String permission) {
+		permissions.put(click, permission);
+	}
+
+	@Nullable
+	public Object getPermission(@NotNull ClickType click) {
+		return permissions.get(click);
+	}
+
+	public void setListener(@NotNull ClickType click, @Nullable Runnable listener) {
+		listeners.put(click, listener);
+	}
+
+	@Nullable
+	public Runnable getListener(@NotNull ClickType click) {
+		return listeners.get(click);
 	}
 }
