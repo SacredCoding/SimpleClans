@@ -106,7 +106,7 @@ public class SCPlayerListener implements Listener {
         }
 
         if (plugin.getSettingsManager().isForceCommandPriority()) {
-            if (command.equalsIgnoreCase(plugin.getSettingsManager().getCommandAlly())) {
+            if (command.equalsIgnoreCase(plugin.getSettingsManager().getCommandAlly()) && plugin.getSettingsManager().isAllyChatEnable()) {
                 if (!plugin.getServer().getPluginCommand(plugin.getSettingsManager().getCommandAlly()).equals(plugin.getCommand(plugin.getSettingsManager().getCommandAlly()))) {
                     new AllyCommandExecutor().onCommand(player, null, null, Helper.removeFirst(split));
                     event.setCancelled(true);
