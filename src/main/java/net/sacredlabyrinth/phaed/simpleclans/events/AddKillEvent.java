@@ -29,13 +29,6 @@ public class AddKillEvent extends Event implements Cancellable {
         return victim;
     }
 
-    public void setAttacker(ClanPlayer attacker) {
-        this.attacker = attacker;
-    }
-
-    public void setVictim(ClanPlayer victim) {
-        this.victim = victim;
-    }
 
     @Override
     public void setCancelled(boolean value) {
