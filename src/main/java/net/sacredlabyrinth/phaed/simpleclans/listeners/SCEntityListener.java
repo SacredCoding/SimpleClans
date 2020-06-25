@@ -4,14 +4,11 @@ import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.Kill;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
-import net.sacredlabyrinth.phaed.simpleclans.events.AddKillEvent;
 import net.sacredlabyrinth.phaed.simpleclans.managers.PermissionsManager;
 import net.sacredlabyrinth.phaed.simpleclans.managers.StorageManager.DataCallback;
 import net.sacredlabyrinth.phaed.simpleclans.Kill.Type;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -21,7 +18,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -106,17 +102,17 @@ public class SCEntityListener implements Listener
             	if (pm.has(attacker, kdrExempt) || pm.has(victim, kdrExempt)) {
             		return;
             	}
-            	AddKillEvent addKillEvent = new AddKillEvent(plugin.getClanManager().getCreateClanPlayer(attacker.getUniqueId()),plugin.getClanManager().getCreateClanPlayer(victim.getUniqueId()));
-                Bukkit.getServer().getPluginManager().callEvent(addKillEvent);
-                if(addKillEvent.isCancelled()) return;
-                ClanPlayer victimCp = addKillEvent.getVictim();
-                ClanPlayer attackerCp = addKillEvent.getAttacker();
+            	            
+                ClanPlayer attackerCp = plugin.getClanManager().getCreateClanPlayer(attacker.getUniqueId());
+                ClanPlayer victimCp = plugin.getClanManager().getCreateClanPlayer(victim.getUniqueId());
+
                 double reward = 0;
                 double multipier = plugin.getSettingsManager().getKDRMultipliesPerKill();
                 float kdr = attackerCp.getKDR();
+
                 if (victimCp.getClan() == null || attackerCp.getClan() == null || !victimCp.getClan().isVerified() || !attackerCp.getClan().isVerified())
                 {
-                    addKill(Kill.Type.CIVILIAN, attackerCp, victimCp);
+                    addKill(Type.CIVILIAN, attackerCp, victimCp);
                 } else if (attackerCp.getClan().isRival(victimCp.getTag()))
                 {
                     if (attackerCp.getClan().isWarring(victimCp.getClan()))
@@ -126,14 +122,14 @@ public class SCEntityListener implements Listener
                     {
                         reward = (double) kdr * multipier * 2;
                     }
-                    addKill(Kill.Type.RIVAL, attackerCp, victimCp);
+                    addKill(Type.RIVAL, attackerCp, victimCp);
                 } else if (attackerCp.getClan().isAlly(victimCp.getTag()))
                 {
                     reward = (double) kdr * multipier * -1;
                 } else
                 {
                     reward = (double) kdr * multipier;
-                    addKill(Kill.Type.NEUTRAL, attackerCp, victimCp);
+                    addKill(Type.NEUTRAL, attackerCp, victimCp);
                 }
 
                 if (reward != 0 && plugin.getSettingsManager().isMoneyPerKill())
@@ -141,7 +137,7 @@ public class SCEntityListener implements Listener
                     for (ClanPlayer cp : attackerCp.getClan().getOnlineMembers())
                     {
                         double money = Math.round((reward / attackerCp.getClan().getOnlineMembers().size()) * 100D) / 100D;
-                        cp.toPlayer().sendMessage(ChatColor.AQUA + MessageFormat.format(plugin.getLang("player.got.money"), money, victimCp.toPlayer().getName(), kdr));
+                        cp.toPlayer().sendMessage(ChatColor.AQUA + MessageFormat.format(plugin.getLang("player.got.money"), money, victim.getName(), kdr));
                         plugin.getPermissionsManager().playerGrantMoney(cp.toPlayer(), money);
                     }
                 }
@@ -152,29 +148,7 @@ public class SCEntityListener implements Listener
             }
         }
     }
-    /**
-     * @param event
-     */
-    @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlayerRespawn(PlayerRespawnEvent event) {
-        if (plugin.getSettingsManager().isBlacklistedWorld(event.getPlayer().getLocation().getWorld().getName())) {
-            return;
-        }
 
-        if (plugin.getSettingsManager().isTeleportOnSpawn()) {
-            Player player = event.getPlayer();
-
-            ClanPlayer cp = plugin.getClanManager().getClanPlayer(player);
-
-            if (cp != null) {
-                Location loc = cp.getClan().getHomeLocation();
-
-                if (loc != null) {
-                    event.setRespawnLocation(loc);
-                }
-            }
-        }
-    }
     private void addKill(Kill.Type type, ClanPlayer attacker, ClanPlayer victim) {
     	if (type == null || attacker == null || victim == null) {
     		return;
