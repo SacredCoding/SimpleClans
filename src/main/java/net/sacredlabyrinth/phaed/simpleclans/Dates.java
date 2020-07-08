@@ -67,10 +67,6 @@ public class Dates {
         return differenceInSeconds(new Date(date1.getTime()), new Date(date2.getTime()));
     }
 
-    private static double differenceInMilliseconds(Timestamp date1, Timestamp date2) {
-        return differenceInMilliseconds(new Date(date1.getTime()), new Date(date2.getTime()));
-    }
-
     /**
      * @param date1
      * @param date2
@@ -134,5 +130,63 @@ public class Dates {
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         return cal.getTimeInMillis() + cal.getTimeZone().getOffset(cal.getTimeInMillis());
+    }
+
+    /**
+     * Returns the string representation of the amount of time labeled as days, hours, minutes, seconds
+     * @author RoboMWM, LaxWasHere
+     * @param seconds the time in seconds
+     * @param depth Max amount of detail (e.g. only display days and hours if set to 1 and seconds > 1 day)
+     * @return
+     */
+    public static String formatTime(Long seconds, int depth)
+    {
+        SimpleClans plugin = SimpleClans.getInstance();
+        if (seconds == null || seconds < 1) {
+            return plugin.getLang("bb.moments");
+        }
+
+        if (seconds < 60) {
+            return seconds + plugin.getLang("bb.seconds");
+        }
+
+        if (seconds < 3600) {
+            Long count = (long) Math.ceil(seconds / 60);
+            String res;
+            if (count > 1) {
+                res = count + plugin.getLang("bb.minutes");
+            } else {
+                res = plugin.getLang("bb.one.minute");
+            }
+            Long remaining = seconds % 60;
+            if (depth > 0 && remaining >= 5) {
+                return res + ", " + formatTime(remaining, --depth);
+            }
+            return res;
+        }
+        if (seconds < 86400) {
+            Long count = (long) Math.ceil(seconds / 3600);
+            String res;
+            if (count > 1) {
+                res = count + plugin.getLang("bb.hours");
+            } else {
+                res = plugin.getLang("bb.one.hour");
+            }
+            if (depth > 0) {
+                return res + ", " + formatTime(seconds % 3600, --depth);
+            }
+            return res;
+        }
+        Long count = (long) Math.ceil(seconds / 86400);
+        String res;
+        if (count > 1) {
+            res = count + plugin.getLang("bb.days");
+        } else {
+            res = plugin.getLang("bb.one.day");
+        }
+        if (depth > 0) {
+            return res + ", " + formatTime(seconds % 86400, --depth);
+        }
+        return res;
     }
 }

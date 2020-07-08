@@ -7,16 +7,16 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.TreeMap;
 
 @SuppressWarnings("unchecked")
+@Deprecated
 public class LanguageManager {
     private File file;
     private HashMap<String, String> language;
     private String[] comments = new String[]{};
 
     public LanguageManager() {
-        load();
+        //load();
     }
 
     public void load() {
@@ -85,6 +85,6 @@ public class LanguageManager {
             return o.toString();
         }
 
-        return null;
+        return "Missing language for "+key;
     }
 }

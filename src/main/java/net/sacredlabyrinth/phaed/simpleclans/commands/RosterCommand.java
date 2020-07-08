@@ -59,7 +59,7 @@ public class RosterCommand {
                 ChatBlock chatBlock = new ChatBlock();
 
                 ChatBlock.sendBlank(player);
-                ChatBlock.saySingle(player, plugin.getSettingsManager().getPageClanNameColor() + Helper.capitalize(clan.getName()) + subColor + " " + plugin.getLang("roster") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
+                ChatBlock.saySingle(player, plugin.getSettingsManager().getPageClanNameColor() + clan.getName() + subColor + " " + plugin.getLang("roster") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
                 ChatBlock.sendBlank(player);
                 ChatBlock.sendMessage(player, headColor + plugin.getLang("legend") + " " + plugin.getSettingsManager().getPageLeaderColor() + plugin.getLang("leader") + headColor + ", " + plugin.getSettingsManager().getPageTrustedColor() + plugin.getLang("trusted") + headColor + ", " + plugin.getSettingsManager().getPageUnTrustedColor() + plugin.getLang("untrusted"));
                 ChatBlock.sendBlank(player);
@@ -80,7 +80,7 @@ public class RosterCommand {
                     String name = plugin.getSettingsManager().getPageLeaderColor() + cp.getName();
                     String lastSeen = p != null && p.isOnline() && !Helper.isVanished(p) ? ChatColor.GREEN + plugin.getLang("online") : ChatColor.WHITE + cp.getLastSeenDaysString();
 
-                    chatBlock.addRow("  " + name, ChatColor.YELLOW + Helper.parseColors(cp.getRank()), lastSeen);
+                    chatBlock.addRow("  " + name, ChatColor.YELLOW + Helper.parseColors(cp.getRankDisplayName()) + ChatColor.RESET, lastSeen);
 
                 }
 
@@ -90,7 +90,7 @@ public class RosterCommand {
                     String name = (cp.isTrusted() ? plugin.getSettingsManager().getPageTrustedColor() : plugin.getSettingsManager().getPageUnTrustedColor()) + cp.getName();
                     String lastSeen = p != null && p.isOnline() && !Helper.isVanished(p) ? ChatColor.GREEN + plugin.getLang("online") : ChatColor.WHITE + cp.getLastSeenDaysString();
 
-                    chatBlock.addRow("  " + name, ChatColor.YELLOW + Helper.parseColors(cp.getRank()), lastSeen);
+                    chatBlock.addRow("  " + name, ChatColor.YELLOW + Helper.parseColors(cp.getRankDisplayName()) + ChatColor.RESET, lastSeen);
                 }
 
                 boolean more = chatBlock.sendBlock(player, plugin.getSettingsManager().getPageSize());

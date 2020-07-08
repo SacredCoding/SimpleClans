@@ -58,13 +58,8 @@ public class PlaceCommand {
                 oldClan.clanAnnounce(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("clan.has.been.disbanded"), oldClan.getName()));
                 oldClan.disband();
             } else {
-                oldClan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("0.has.resigned"), Helper.capitalize(player.getName())));
-
-                if (SimpleClans.getInstance().hasUUID()) {
-                    oldClan.removePlayerFromClan(player.getUniqueId());
-                } else {
-                    oldClan.removePlayerFromClan(player.getName());
-                }
+                oldClan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("0.has.resigned"), player.getName()));
+                oldClan.removePlayerFromClan(player.getUniqueId());
             }
         }
 

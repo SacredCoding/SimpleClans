@@ -7,6 +7,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
 
+import org.bukkit.scheduler.BukkitRunnable;
+
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 
 /**
@@ -25,29 +27,33 @@ public class SQLiteCore implements DBCore {
     public SQLiteCore(String dbLocation) {
         this.dbName = "SimpleClans";
         this.dbLocation = dbLocation;
-        this.log = SimpleClans.getLog();
-
+        this.log = SimpleClans.getInstance().getLogger();
         initialize();
     }
 
     private void initialize() {
         if (file == null) {
+
             File dbFolder = new File(dbLocation);
 
             if (dbName.contains("/") || dbName.contains("\\") || dbName.endsWith(".db")) {
                 log.severe("The database name can not contain: /, \\, or .db");
                 return;
             }
+
             if (!dbFolder.exists()) {
                 dbFolder.mkdir();
             }
 
             file = new File(dbFolder.getAbsolutePath() + File.separator + dbName + ".db");
+
         }
 
         try {
             Class.forName("org.sqlite.JDBC");
+
             connection = DriverManager.getConnection("jdbc:sqlite:" + file.getAbsolutePath());
+
         } catch (SQLException ex) {
             log.severe("SQLite exception on initialize " + ex);
         } catch (ClassNotFoundException ex) {
@@ -98,7 +104,6 @@ public class SQLiteCore implements DBCore {
     @Override
     public ResultSet select(String query) {
         try {
-
             return getConnection().createStatement().executeQuery(query);
         } catch (SQLException ex) {
             log.severe("Error at SQL Query: " + ex.getMessage());
@@ -114,14 +119,18 @@ public class SQLiteCore implements DBCore {
      */
     @Override
     public void insert(String query) {
-        try {
-            getConnection().createStatement().executeQuery(query);
-        } catch (SQLException ex) {
-            if (!ex.toString().contains("not return ResultSet")) {
-                log.severe("Error at SQL INSERT Query: " + ex);
-                log.severe("Query: " + query);
-            }
-        }
+    	if (SimpleClans.getInstance().getSettingsManager().getUseThreads()) {
+    		executeAsync(query, "INSERT");    		
+    	} else {
+    		try {
+    			getConnection().createStatement().executeQuery(query);
+    		} catch (SQLException ex) {
+    			if (!ex.toString().contains("not return ResultSet")) {
+    				log.severe("Error at SQL INSERT Query: " + ex);
+    				log.severe("Query: " + query);
+    			}
+    		}
+    	}
     }
 
     /**
@@ -131,13 +140,17 @@ public class SQLiteCore implements DBCore {
      */
     @Override
     public void update(String query) {
-        try {
-            getConnection().createStatement().executeQuery(query);
-        } catch (SQLException ex) {
-            if (!ex.toString().contains("not return ResultSet")) {
-                log.severe("Error at SQL UPDATE Query: " + ex);
-                log.severe("Query: " + query);
-            }
+    	if (SimpleClans.getInstance().getSettingsManager().getUseThreads()) {
+    		executeAsync(query, "UPDATE");    		
+    	} else {
+    		try {
+    			getConnection().createStatement().executeQuery(query);
+    		} catch (SQLException ex) {
+    			if (!ex.toString().contains("not return ResultSet")) {
+    				log.severe("Error at SQL UPDATE Query: " + ex);
+    				log.severe("Query: " + query);
+    			}
+    		}
         }
     }
 
@@ -148,13 +161,17 @@ public class SQLiteCore implements DBCore {
      */
     @Override
     public void delete(String query) {
-        try {
-            getConnection().createStatement().executeQuery(query);
-        } catch (SQLException ex) {
-            if (!ex.toString().contains("not return ResultSet")) {
-                log.severe("Error at SQL DELETE Query: " + ex);
-                log.severe("Query: " + query);
-            }
+    	if (SimpleClans.getInstance().getSettingsManager().getUseThreads()) {
+    		executeAsync(query, "DELETE");    		
+    	} else {
+    		try {
+    			getConnection().createStatement().executeQuery(query);
+    		} catch (SQLException ex) {
+    			if (!ex.toString().contains("not return ResultSet")) {
+    				log.severe("Error at SQL DELETE Query: " + ex);
+    				log.severe("Query: " + query);
+    			}
+    		}
         }
     }
 
@@ -207,5 +224,26 @@ public class SQLiteCore implements DBCore {
             log.severe("Failed to check if column " + column + " exists in table " + table + " : " + e.getMessage());
             return false;
         }
+    }
+    
+    private void executeAsync(String query, String sqlType) {
+    	new BukkitRunnable() {
+			@Override
+			public void run() {
+		        try {
+		        	if (connection != null && !connection.isClosed()) {
+		        		connection.createStatement().executeUpdate(query);
+		        	}
+		        }
+		        catch (SQLException ex) {
+		            if (!ex.toString().contains("not return ResultSet"))
+		            {
+		                log.severe("[Thread] Error at SQL " + sqlType + " Query: " + ex);
+		                log.severe("[Thread] Query: " + query);
+		            }
+		        }				
+			}
+		}.runTaskAsynchronously(SimpleClans.getInstance());
+
     }
 }

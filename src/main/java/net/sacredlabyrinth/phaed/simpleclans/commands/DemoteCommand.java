@@ -17,6 +17,7 @@ import net.sacredlabyrinth.phaed.simpleclans.uuid.UUIDMigration;
  * @author phaed
  */
 public class DemoteCommand {
+
     public DemoteCommand() {
     }
 
@@ -28,6 +29,40 @@ public class DemoteCommand {
      */
     public void execute(Player player, String[] arg) {
         SimpleClans plugin = SimpleClans.getInstance();
+
+        if (arg.length != 1) {
+            ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.demote.leader"), plugin.getSettingsManager().getCommandClan()));
+            return;
+        }
+
+        String demotedName = arg[0];
+
+        if (demotedName == null) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
+            return;
+        }
+        ClanPlayer toDemote;
+        UUID uuid = UUIDMigration.getForcedPlayerUUID(demotedName);
+        toDemote = plugin.getClanManager().getAnyClanPlayer(uuid);
+        
+        if (plugin.getPermissionsManager().has(player, "simpleclans.admin.demote")) {
+            if (!toDemote.isLeader()) {
+                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("player.is.not.a.leader.of.any.clan"));
+                return;
+            }
+            final Clan clan = toDemote.getClan();
+
+            if (clan.getLeaders().size() == 1) {
+                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("you.cannot.demote.the.last.leader"));
+                return;
+            }
+
+            clan.demote(toDemote.getUniqueId());
+                
+            clan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("demoted.back.to.member"), demotedName));
+            ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("player.successfully.demoted"));
+            return;
+        }
 
         if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.demote")) {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
@@ -46,61 +81,25 @@ public class DemoteCommand {
         if (!clan.isLeader(player)) {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
             return;
-        }
-        if (arg.length != 1) {
-            ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.demote.leader"), plugin.getSettingsManager().getCommandClan()));
+        }        
+
+        if (!clan.enoughLeadersOnlineToDemote(toDemote)) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("not.enough.leaders.online.to.vote.on.demotion"));
             return;
         }
 
-        String demotedName = arg[0];
-        boolean allOtherLeadersOnline;
-
-        if (demotedName == null) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
-            return;
-        }
-
-        if (SimpleClans.getInstance().hasUUID()) {
-            UUID PlayerUniqueId = UUIDMigration.getForcedPlayerUUID(demotedName);
-            if (PlayerUniqueId == null) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
-                return;
-            }
-            allOtherLeadersOnline = clan.allOtherLeadersOnline(PlayerUniqueId);
-        } else {
-            allOtherLeadersOnline = clan.allOtherLeadersOnline(demotedName);
-        }
-
-        if (!allOtherLeadersOnline) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("leaders.must.be.online.to.vote.on.demotion"));
-            return;
-        }
-
-        if (SimpleClans.getInstance().hasUUID()) {
-            UUID PlayerUniqueId = UUIDMigration.getForcedPlayerUUID(demotedName);
-            if (!clan.isLeader(PlayerUniqueId)) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("player.is.not.a.leader.of.your.clan"));
-                return;
-            }
-            if (clan.getLeaders().size() != 1 && plugin.getSettingsManager().isConfirmationForDemote()) {
-                plugin.getRequestManager().addDemoteRequest(cp, demotedName, clan);
-                ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("demotion.vote.has.been.requested.from.all.leaders"));
-                return;
-            }
-            clan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("demoted.back.to.member"), Helper.capitalize(demotedName)));
-            clan.demote(PlayerUniqueId);
-        } else {
-            if (!clan.isLeader(demotedName)) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("player.is.not.a.leader.of.your.clan"));
-                return;
-            }
-            if (clan.getLeaders().size() != 1 && plugin.getSettingsManager().isConfirmationForDemote()) {
-                plugin.getRequestManager().addDemoteRequest(cp, demotedName, clan);
-                ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("demotion.vote.has.been.requested.from.all.leaders"));
-                return;
-            }
-            clan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("demoted.back.to.member"), Helper.capitalize(demotedName)));
-            clan.demote(demotedName);
-        }
+		if (!clan.isLeader(uuid)) {
+			ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("player.is.not.a.leader.of.your.clan"));
+			return;
+		}
+		if (clan.getLeaders().size() > 2 && plugin.getSettingsManager().isConfirmationForDemote()) {
+			plugin.getRequestManager().addDemoteRequest(cp, demotedName, clan);
+			ChatBlock.sendMessage(player,
+					ChatColor.AQUA + plugin.getLang("demotion.vote.has.been.requested.from.all.leaders"));
+			return;
+		}
+		clan.addBb(player.getName(), ChatColor.AQUA
+				+ MessageFormat.format(plugin.getLang("demoted.back.to.member"), demotedName));
+		clan.demote(uuid);
     }
 }

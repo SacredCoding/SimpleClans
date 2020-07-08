@@ -44,10 +44,6 @@ public class RivalCommand {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("your.clan.cannot.create.rivals"));
             return;
         }
-        if (!clan.isLeader(player)) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
-            return;
-        }
         if (arg.length != 2) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.rival"), plugin.getSettingsManager().getCommandClan()));
             return;
@@ -65,6 +61,12 @@ public class RivalCommand {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.clan.matched"));
             return;
         }
+        if (clan.getTag().equals(rival.getTag()))
+        {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("you.cannot.rival.your.own.clan"));
+            return;
+        }
+            
         if (plugin.getSettingsManager().isUnrivable(rival.getTag())) {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("the.clan.cannot.be.rivaled"));
             return;
@@ -75,11 +77,14 @@ public class RivalCommand {
         }
 
         if (action.equals(plugin.getLang("add"))) {
+            if (!plugin.getPermissionsManager().has(player, RankPermission.RIVAL_ADD, PermissionLevel.LEADER, true)) {
+            	return;
+            }
             if (!clan.reachedRivalLimit()) {
                 if (!clan.isRival(rival.getTag())) {
                     clan.addRival(rival);
-                    rival.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("has.initiated.a.rivalry"), Helper.capitalize(clan.getName()), rival.getName()));
-                    clan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("has.initiated.a.rivalry"), Helper.capitalize(player.getName()), Helper.capitalize(rival.getName())));
+                    rival.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("has.initiated.a.rivalry"), clan.getName(), rival.getName()), false);
+                    clan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("has.initiated.a.rivalry"), player.getName(), rival.getName()));
                 } else {
                     ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("your.clans.are.already.rivals"));
                 }
@@ -90,9 +95,12 @@ public class RivalCommand {
         }
 
         if (action.equals(plugin.getLang("remove"))) {
+            if (!plugin.getPermissionsManager().has(player, RankPermission.RIVAL_REMOVE, PermissionLevel.LEADER, true)) {
+            	return;
+            }
             if (clan.isRival(rival.getTag())) {
                 plugin.getRequestManager().addRivalryBreakRequest(cp, rival, clan);
-                ChatBlock.sendMessage(player, ChatColor.AQUA + MessageFormat.format(plugin.getLang("leaders.asked.to.end.rivalry"), Helper.capitalize(rival.getName())));
+                ChatBlock.sendMessage(player, ChatColor.AQUA + MessageFormat.format(plugin.getLang("leaders.asked.to.end.rivalry"), rival.getName()));
             } else {
                 ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("your.clans.are.not.rivals"));
             }

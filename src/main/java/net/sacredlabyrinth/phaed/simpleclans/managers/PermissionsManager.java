@@ -1,40 +1,45 @@
 package net.sacredlabyrinth.phaed.simpleclans.managers;
 
-import com.wasteofplastic.askyblock.ASkyBlock;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
-import net.sacredlabyrinth.Phaed.PreciousStones.PreciousStones;
+import net.sacredlabyrinth.phaed.simpleclans.ChatBlock;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
+import net.sacredlabyrinth.phaed.simpleclans.PermissionLevel;
+import net.sacredlabyrinth.phaed.simpleclans.RankPermission;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
+import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+
+import static net.sacredlabyrinth.phaed.simpleclans.SimpleClans.lang;
 
 /**
  * @author phaed
  */
 public final class PermissionsManager {
+
     /**
      *
      */
-    private SimpleClans plugin;
+    private final SimpleClans plugin;
 
     private static Permission permission = null;
     private static Economy economy = null;
     private static Chat chat = null;
-    private static ASkyBlock skyblock;
 
-    private HashMap<String, List<String>> permissions = new HashMap<>();
-    private HashMap<Player, PermissionAttachment> permAttaches = new HashMap<>();
-
+    private final HashMap<String, List<String>> permissions = new HashMap<>();
+    private final HashMap<Player, PermissionAttachment> permAttaches = new HashMap<>();
 
     /**
      *
@@ -49,24 +54,12 @@ public final class PermissionsManager {
             setupEconomy();
             setupPermissions();
         } catch (ClassNotFoundException e) {
-            SimpleClans.log("[PreciousStones] Vault not found. No economy or extended Permissions support.");
-        }
-
-        detectSkyBlock();
-    }
-
-    private void detectSkyBlock() {
-        if (skyblock == null) {
-            Plugin test = plugin.getServer().getPluginManager().getPlugin("ASkyBlock");
-
-            if (test != null) {
-                skyblock = ((ASkyBlock) test);
-            }
+            SimpleClans.getInstance().getLogger().info("Vault not found. No economy or extended Permissions support.");
         }
     }
 
     /**
-     * Whether exonomy plugin exists and is enabled
+     * Whether economy plugin exists and is enabled
      *
      * @return
      */
@@ -86,7 +79,7 @@ public final class PermissionsManager {
     }
 
     /**
-     * Saves the permissions for earch clan from the config
+     * Saves the permissions for each clan from the config
      */
     public void savePermissions() {
         for (Clan clan : plugin.getClanManager().getClans()) {
@@ -94,11 +87,12 @@ public final class PermissionsManager {
                 SimpleClans.getInstance().getSettingsManager().getConfig().set("permissions." + clan.getTag(), getPermissions(clan));
             }
         }
+        SimpleClans.getInstance().getSettingsManager().load();
         SimpleClans.getInstance().getSettingsManager().save();
     }
 
     /**
-     * Adds all pemrissions for a clan
+     * Adds all permissions for a clan
      *
      * @param clan
      */
@@ -166,12 +160,34 @@ public final class PermissionsManager {
         return permissions.get(clan.getTag());
     }
 
-
     /**
      * @return the PermissionsAttachments for every player
      */
     public Map<Player, PermissionAttachment> getPermAttaches() {
         return permAttaches;
+    }
+    
+    /**
+     * Charge a player some money
+     *
+     * @param player
+     * @param money
+     * @return
+     */    
+    @Deprecated
+    public boolean playerChargeMoney(String player, double money) {
+        return economy.withdrawPlayer(player, money).transactionSuccess();
+    }
+    
+    /**
+     * Charge a player some money
+     *
+     * @param player
+     * @param money
+     * @return
+     */    
+    public boolean playerChargeMoney(OfflinePlayer player, double money) {
+        return economy.withdrawPlayer(player, money).transactionSuccess();
     }
 
     /**
@@ -182,7 +198,7 @@ public final class PermissionsManager {
      * @return
      */
     public boolean playerChargeMoney(Player player, double money) {
-        return economy.withdrawPlayer(player.getName(), money).transactionSuccess();
+    	return playerChargeMoney((OfflinePlayer) player, money);
     }
 
     /**
@@ -193,7 +209,7 @@ public final class PermissionsManager {
      * @return
      */
     public boolean playerGrantMoney(Player player, double money) {
-        return economy.depositPlayer(player.getName(), money).transactionSuccess();
+        return economy.depositPlayer(player, money).transactionSuccess();
     }
 
     /**
@@ -203,7 +219,19 @@ public final class PermissionsManager {
      * @param money
      * @return
      */
+    @Deprecated
     public boolean playerGrantMoney(String player, double money) {
+        return economy.depositPlayer(player, money).transactionSuccess();
+    }
+
+    /**
+     * Grants a player some money
+     *
+     * @param player
+     * @param money
+     * @return
+     */
+    public boolean playerGrantMoney(OfflinePlayer player, double money) {
         return economy.depositPlayer(player, money).transactionSuccess();
     }
 
@@ -215,7 +243,7 @@ public final class PermissionsManager {
      * @return whether he has the money
      */
     public boolean playerHasMoney(Player player, double money) {
-        return economy.has(player.getName(), money);
+        return economy.has(player, money);
     }
 
     /**
@@ -225,14 +253,30 @@ public final class PermissionsManager {
      * @return the players money
      */
     public double playerGetMoney(Player player) {
-        return economy.getBalance(player.getName());
+        return economy.getBalance(player);
     }
 
     /**
      * Check if a player has permissions
      *
+     * @param world the world
      * @param player the player
-     * @param perm   the permission
+     * @param perm the permission
+     * @return whether he has the permission
+     */
+    public boolean has(String world, OfflinePlayer player, String perm) {
+    	if (player != null && permission != null) {
+    		return permission.playerHas(world, player, perm);
+    	}
+    	
+    	return false;
+    }    
+    
+    /**
+     * Check if a player has permissions
+     *
+     * @param player the player
+     * @param perm the permission
      * @return whether he has the permission
      */
     public boolean has(Player player, String perm) {
@@ -245,6 +289,116 @@ public final class PermissionsManager {
         } else {
             return player.hasPermission(perm);
         }
+    }
+    
+    /**
+     * Checks if the player has the rank permission or the permission level, and the equivalent Bukkit permission
+     * 
+     * @param player the player
+     * @param permission the rank permission
+     * @param notify notify the player if they don't have permission
+     * @return
+     */
+    @Deprecated
+    public boolean has(Player player, RankPermission permission, PermissionLevel level, boolean notify) {
+    	if (player == null || permission == null) {
+    		return false;
+    	}
+    	
+    	ClanPlayer clanPlayer = plugin.getClanManager().getClanPlayer(player);
+    	if (clanPlayer == null) {
+    		return false;
+    	}
+    	
+    	boolean hasBukkitPermission = has(player, permission.getBukkitPermission());
+    	if (!hasBukkitPermission) {
+    		return false;
+    	}
+    	
+    	boolean hasLevel = false;
+    	if (level != null) {
+    		switch (level) {
+    			case LEADER:
+    				hasLevel = clanPlayer.isLeader();
+    				break;
+    			case TRUSTED:
+    				hasLevel = clanPlayer.isTrusted();
+    				break;
+    		}
+    	}
+    	
+    	boolean hasRankPermission = false;
+    	String rankName = clanPlayer.getRankId();
+    	Clan clan = clanPlayer.getClan();
+		if (clan.hasRank(rankName)) {
+			hasRankPermission = clan.getRank(rankName).getPermissions().contains(permission.toString());
+		} else {
+			if (rankName != null && !rankName.isEmpty()) {
+				clanPlayer.setRank(null);
+			}
+		}
+		
+		if (notify && !hasLevel && !hasRankPermission) {
+            ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(lang("you.must.be.0.or.have.the.permission.1.to.use.this"),
+            		level == PermissionLevel.LEADER ? lang("leader") : lang("trusted"), permission.toString()));
+		}
+    	
+    	return hasLevel || hasRankPermission;
+    }
+    
+    /**
+     * Checks if the player has the rank permission or the permission level, and the equivalent Bukkit permission
+     * 
+     * @param player the player
+     * @param permission the rank permission
+     * @param notify notify the player if they don't have permission
+     * @return
+     */
+    public boolean has(Player player, RankPermission permission, boolean notify) {
+    	if (player == null || permission == null) {
+    		return false;
+    	}
+    	
+    	ClanPlayer clanPlayer = plugin.getClanManager().getClanPlayer(player);
+    	if (clanPlayer == null) {
+    		return false;
+    	}
+    	
+    	boolean hasBukkitPermission = has(player, permission.getBukkitPermission());
+    	if (!hasBukkitPermission) {
+    	    if (notify) {
+                ChatBlock.sendMessage(player, lang(ChatColor.RED + "insufficient.permissions"));
+            }
+    		return false;
+    	}
+    	
+		boolean hasLevel = false;
+		switch (permission.getPermissionLevel()) {
+			case LEADER:
+				hasLevel = clanPlayer.isLeader();
+				break;
+			case TRUSTED:
+				hasLevel = clanPlayer.isTrusted();
+				break;
+		}
+    	
+    	boolean hasRankPermission = false;
+    	String rankName = clanPlayer.getRankId();
+    	Clan clan = clanPlayer.getClan();
+		if (clan.hasRank(rankName)) {
+			hasRankPermission = clan.getRank(rankName).getPermissions().contains(permission.toString());
+		} else {
+			if (rankName != null && !rankName.isEmpty()) {
+				clanPlayer.setRank(null);
+			}
+		}
+		
+		if (notify && !hasLevel && !hasRankPermission) {
+            ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(lang("you.must.be.0.or.have.the.permission.1.to.use.this"),
+            		permission.getPermissionLevel() == PermissionLevel.LEADER ? lang("leader") : lang("trusted"), permission.toString()));
+		}
+    	
+    	return hasLevel || hasRankPermission;
     }
 
     /**
@@ -344,7 +498,6 @@ public final class PermissionsManager {
      * @param p
      * @return
      */
-    @SuppressWarnings({"deprecation", "deprecation"})
     public String getPrefix(Player p) {
         String out = "";
 
@@ -359,10 +512,9 @@ public final class PermissionsManager {
         if (permission != null && chat != null) {
             try {
                 String world = p.getWorld().getName();
-                String name = p.getName();
-                String prefix = chat.getPlayerPrefix(name, world);
+                String prefix = chat.getPlayerPrefix(world, p);
                 if (prefix == null || prefix.isEmpty()) {
-                    String group = permission.getPrimaryGroup(world, name);
+                    String group = permission.getPrimaryGroup(world, p);
                     prefix = chat.getGroupPrefix(world, group);
                     if (prefix == null) {
                         prefix = "";
@@ -384,8 +536,7 @@ public final class PermissionsManager {
         {
             out += ((ColorMe) colorMe).getColor(p.getName());
         }
-        */
-
+         */
         return out;
     }
 
@@ -393,7 +544,6 @@ public final class PermissionsManager {
      * @param p
      * @return
      */
-    @SuppressWarnings({"deprecation", "deprecation"})
     public String getSuffix(Player p) {
         try {
             if (chat != null) {
@@ -406,11 +556,10 @@ public final class PermissionsManager {
         if (permission != null && chat != null) {
             try {
                 String world = p.getWorld().getName();
-                String name = p.getName();
-                String suffix = chat.getPlayerSuffix(world, name);
+                String suffix = chat.getPlayerSuffix(world, p);
                 if (suffix == null || suffix.isEmpty()) {
-                    String group = permission.getPrimaryGroup(world, name);
-                    suffix = chat.getPlayerSuffix(world, group);
+                    String group = permission.getPrimaryGroup(world, p);
+                    suffix = chat.getGroupSuffix(world, group);
                     if (suffix == null) {
                         suffix = "";
                     }

@@ -1,18 +1,27 @@
 package net.sacredlabyrinth.phaed.simpleclans;
 
-import net.sacredlabyrinth.phaed.simpleclans.storage.DBCore;
 import net.sacredlabyrinth.phaed.simpleclans.uuid.UUIDMigration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.Map.Entry;
+
+import net.sacredlabyrinth.phaed.simpleclans.managers.SettingsManager;
 
 /**
  * @author phaed
@@ -29,6 +38,142 @@ public class Helper {
         for (StackTraceElement el : Thread.currentThread().getStackTrace()) {
             SimpleClans.debug(el.toString());
         }
+    }
+    
+    public static String formatKDR(float kdr) {
+    	DecimalFormat formatter = new DecimalFormat("#.#");
+    	return formatter.format(kdr);
+    }
+    
+    /**
+     * Gets the Player locale
+     * 
+     * @param player the player
+     * @return the locale
+     */
+    public static Locale getLocale(Player player) {
+    	String lang = player.getLocale();
+    	String[] split = lang.split("_");
+    	
+    	if (split.length == 2) {
+    		return new Locale(split[0], split[1]);
+    	}
+    	
+    	return new Locale(lang);
+    }
+    
+    /**
+     * Converts a JSON String to a list of Ranks
+     * 
+     * @param json
+     * @return a list of ranks or null if the JSON String is null/empty
+     */
+	public static List<Rank> ranksFromJson(String json) {
+    	if (json != null && !json.isEmpty()) {
+	    	try {
+				JSONObject jo = (JSONObject) new JSONParser().parse(json);
+				Object ranks = jo.get("ranks");
+				if (ranks != null) {
+					JSONArray array = (JSONArray) ranks;
+					List<Rank> rankList = new ArrayList<>();
+					for (Object o : array) {
+						JSONObject r = (JSONObject) o;
+						String name = (String) r.get("name");
+						String displayName = (String) r.get("displayName");
+						Set<String> permissions = new HashSet<>();
+						for (Object p : (JSONArray) r.get("permissions")) {
+							permissions.add((String) p);
+						}
+						Rank rank = new Rank(name, displayName, permissions);
+						rankList.add(rank);
+					}
+					
+					return rankList;
+					
+				}
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+    	}
+    	return null;
+    }
+    
+    /**
+     * Converts a list of Ranks to a JSON String
+     * 
+     * @param ranks
+     * @return a JSON String
+     */
+    @SuppressWarnings("unchecked")
+	public static String ranksToJson(List<Rank> ranks) {
+    	if (ranks == null)
+    		ranks = new ArrayList<Rank>();
+    	
+    	JSONArray array = new JSONArray();
+    	for (Rank rank : ranks) {
+    		JSONObject o = new JSONObject();
+    		o.put("name", rank.getName());
+    		o.put("displayName", rank.getDisplayName());
+    		JSONArray permArray = new JSONArray();
+    		for (String p : rank.getPermissions()) {
+    			permArray.add(p);
+    		}
+    		o.put("permissions", permArray);
+    		array.add(o);
+    	}
+    	
+    	JSONObject object = new JSONObject();
+    	object.put("ranks", array);
+    	return object.toJSONString();
+    }
+    
+    /**
+     * Converts a resign times map to a JSON String
+     * 
+     * @param resignTimes
+     * @return a JSON String
+     */
+    public static String resignTimesToJson(Map<String, Long> resignTimes) {
+    	return JSONObject.toJSONString(resignTimes);
+    }
+    
+    /**
+     * Converts a JSON String to a resign times map
+     * 
+     * @param json JSON String
+     * @return a map
+     */
+    @SuppressWarnings("unchecked")
+	public static Map<String, Long> resignTimesFromJson(String json) {
+    	if (json != null) {
+	    	try {
+				return (Map<String, Long>) new JSONParser().parse(json);
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}	
+    	}
+    	return null;
+    }
+    
+    /**
+     * Returns the delay in seconds to the specified hour and minute.
+     * 
+     * @param hour hour
+     * @param minute minute
+     * @return the delay in seconds
+     */
+    public static long getDelayTo(int hour, int minute) {
+    	if (hour < 0 || hour > 23) hour = 1;
+    	if (minute < 0 || minute > 59) minute = 0;
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime d = LocalDateTime.of(now.toLocalDate(), LocalTime.of(hour, minute));
+        long delay;
+        if (now.isAfter(d)) {
+            delay = now.until(d.plusDays(1), ChronoUnit.SECONDS);
+        } else {
+            delay = now.until(d, ChronoUnit.SECONDS);
+        }
+        return delay;
     }
 
     /**
@@ -264,6 +409,20 @@ public class Helper {
     public static String[] toArray(List<String> list) {
         return list.toArray(new String[list.size()]);
     }
+    
+    /**
+     * Converts the Permission values array to a String array
+     * 
+     * @return
+     */
+    public static String[] fromPermissionArray() {
+    	RankPermission[] permissions = RankPermission.values();
+    	String[] sa = new String[permissions.length];
+    	for (int i = 0; i < permissions.length; i++) {
+    		sa[i] = permissions[i].toString();
+    	}
+    	return sa;
+    }
 
     /**
      * Removes first item from a string array
@@ -347,15 +506,14 @@ public class Helper {
      * @return
      */
     public static String stripColors(String msg) {
-        String out = msg.replaceAll("[&][0-9a-f]", "");
+        String out = msg.replaceAll("[&][0-9a-fk-or]", "");
         out = out.replaceAll(String.valueOf((char) 194), "");
-        return out.replaceAll("[\u00a7][0-9a-f]", "");
+        return out.replaceAll("[\u00a7][0-9a-fk-or]", "");
     }
 
     /*
      * Retrieves the last color code @param msg @return
      */
-
     /**
      * @param msg
      * @return
@@ -377,7 +535,6 @@ public class Helper {
         if (one.equals("&")) {
             return Helper.toColor(two);
         }
-
 
         return "";
     }
@@ -406,7 +563,7 @@ public class Helper {
 
         String out = msg;
         String first = msg.substring(0, sep.length());
-        String last = msg.substring(msg.length() - sep.length(), msg.length());
+        String last = msg.substring(msg.length() - sep.length());
 
         if (first.equals(sep)) {
             out = msg.substring(sep.length());
@@ -452,7 +609,6 @@ public class Helper {
 
         return false;
     }
-
 
     /**
      * Check whether a player is online
@@ -575,13 +731,13 @@ public class Helper {
         });
 
         Map result = new LinkedHashMap();
-        for (Iterator it = list.iterator(); it.hasNext(); ) {
+        for (Iterator it = list.iterator(); it.hasNext();) {
             Map.Entry entry = (Map.Entry) it.next();
             result.put(entry.getKey(), entry.getValue());
         }
         return result;
     }
-
+    
     public static boolean isVanished(Player player) {
         if (player != null && player.hasMetadata("vanished") && !player.getMetadata("vanished").isEmpty()) {
             return player.getMetadata("vanished").get(0).asBoolean();
@@ -589,7 +745,8 @@ public class Helper {
         return false;
     }
 
-    public static Collection<Player> getOnlinePlayers() {
+    @SuppressWarnings("unchecked")
+	public static Collection<Player> getOnlinePlayers() {
         try {
             Method method = Bukkit.class.getDeclaredMethod("getOnlinePlayers");
             Object players = method.invoke(null);
@@ -607,10 +764,84 @@ public class Helper {
     }
 
     public static Player getPlayer(String playerName) {
-        if (SimpleClans.getInstance().hasUUID()) {
-            return SimpleClans.getInstance().getServer().getPlayer(UUIDMigration.getForcedPlayerUUID(playerName));
-        }
+    	return SimpleClans.getInstance().getServer().getPlayer(UUIDMigration.getForcedPlayerUUID(playerName));
+    }
 
-        return SimpleClans.getInstance().getServer().getPlayer(playerName);
+    /**
+     * Formats the ally chat
+     * 
+     * @param cp Sender
+     * @param msg The message
+     * @param placeholders The placeholders
+     * @return The formated message
+     */
+    public static String formatAllyChat(ClanPlayer cp, String msg, Map<String, String> placeholders) {
+        SettingsManager sm = SimpleClans.getInstance().getSettingsManager();
+
+        String leaderColor = sm.getAllyChatLeaderColor();
+        String memberColor = sm.getAllyChatMemberColor();
+        String rank = cp.getRankId().isEmpty() ? null : ChatColor.translateAlternateColorCodes('&', cp.getRankDisplayName());
+        String rankFormat = rank != null ? ChatColor.translateAlternateColorCodes('&', sm.getAllyChatRank()).replace("%rank%", rank) : "";
+
+        String message = replacePlaceholders(sm.getAllyChatFormat(), cp, leaderColor, memberColor, rankFormat, msg);
+        if (placeholders != null) {
+            for (Entry<String, String> e : placeholders.entrySet()) {
+                message = message.replace("%"+e.getKey()+"%", e.getValue());
+            }
+        }
+        return message;
+    }
+
+    private static String replacePlaceholders(String messageFormat, ClanPlayer cp, String leaderColor, String memberColor, String rankFormat, String msg) {
+        String message = ChatColor.translateAlternateColorCodes('&', messageFormat)
+                .replace("%clan%", cp.getClan().getColorTag())
+                .replace("%nick-color%", (cp.isLeader() ? leaderColor : memberColor))
+                .replace("%player%", cp.getName())
+                .replace("%rank%", rankFormat)
+                .replace("%message%", msg);
+        return message;
+    }
+
+    /**
+     * Formats the clan chat
+     * 
+     * @param cp Sender
+     * @param msg The message
+     * @param placeholders The placeholders
+     * @return The formated message
+     */
+    public static String formatClanChat(ClanPlayer cp, String msg, Map<String, String> placeholders) {
+        SettingsManager sm = SimpleClans.getInstance().getSettingsManager();
+
+        String leaderColor = sm.getClanChatLeaderColor();
+        String memberColor = sm.getClanChatMemberColor();
+        String rank = cp.getRankId().isEmpty() ? null : ChatColor.translateAlternateColorCodes('&', cp.getRankDisplayName());
+        String rankFormat = rank != null ? ChatColor.translateAlternateColorCodes('&', sm.getClanChatRank()).replace("%rank%", rank) : "";
+
+        String message = replacePlaceholders(sm.getClanChatFormat(), cp, leaderColor, memberColor, rankFormat, msg);
+        
+        if (placeholders != null) {
+            for (Entry<String, String> e : placeholders.entrySet()) {
+                message = message.replace("%"+e.getKey()+"%", e.getValue());
+            }
+        }
+        return message;
+    }
+
+    /**
+     * Formats the chat in a way that the Clan Tag is always there, so infractors can be easily identified
+     * 
+     * @param cp Sender
+     * @param msg The chat message
+     * @return The formated message
+     */
+    public static String formatSpyClanChat(ClanPlayer cp, String msg) {
+        msg = stripColors(msg);
+        
+        if (msg.contains(stripColors(cp.getClan().getColorTag()))) {
+            return ChatColor.DARK_GRAY + msg;
+        } else {
+            return ChatColor.DARK_GRAY + "[" + cp.getTag() + "] " + msg;
+        }
     }
 }

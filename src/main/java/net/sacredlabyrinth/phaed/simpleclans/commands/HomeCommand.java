@@ -9,7 +9,7 @@ import org.bukkit.entity.Player;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Random;
-
+import net.sacredlabyrinth.phaed.simpleclans.events.HomeRegroupEvent;
 import net.sacredlabyrinth.phaed.simpleclans.events.PlayerHomeSetEvent;
 
 /**
@@ -82,14 +82,9 @@ public class HomeCommand {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("clan.is.not.verified"));
             return;
         }
-        if (!cp.isTrusted()) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("only.trusted.players.can.access.clan.vitals"));
-            return;
-        }
 
         if (arg.length == 0) {
-            if (!plugin.getPermissionsManager().has(player, "simpleclans.member.home")) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            if (!plugin.getPermissionsManager().has(player, RankPermission.HOME_TP, PermissionLevel.TRUSTED, true)) {
                 return;
             }
 
@@ -107,12 +102,7 @@ public class HomeCommand {
         }
 
         if (arg[0].equalsIgnoreCase("set")) {
-            if (!cp.isLeader()) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
-                return;
-            }
-            if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.home-set")) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            if (!plugin.getPermissionsManager().has(player, RankPermission.HOME_SET, PermissionLevel.LEADER, true)) {
                 return;
             }
             if (plugin.getSettingsManager().isHomebaseSetOnce() && clan.getHomeLocation() != null && !plugin.getPermissionsManager().has(player, "simpleclans.mod.home")) {
@@ -133,12 +123,7 @@ public class HomeCommand {
         }
 
         if (arg[0].equalsIgnoreCase("clear")) {
-            if (!cp.isLeader()) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
-                return;
-            }
-            if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.home-set")) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            if (!plugin.getPermissionsManager().has(player, RankPermission.HOME_SET, PermissionLevel.LEADER, true)) {
                 return;
             }
             if (plugin.getSettingsManager().isHomebaseSetOnce() && clan.getHomeLocation() != null && !plugin.getPermissionsManager().has(player, "simpleclans.mod.home")) {
@@ -156,20 +141,34 @@ public class HomeCommand {
                 ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
                 return;
             }
-
-            Location loc = player.getLocation();
-
-            if (!cp.isLeader()) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
+            
+            if (!plugin.getPermissionsManager().has(player, RankPermission.HOME_REGROUP, PermissionLevel.LEADER, true)) {
+            	return;
             }
-            if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.regroup")) {
-                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
+            
+            Location loc;
+            if (arg.length >= 2 && arg[1].equalsIgnoreCase("me")) {
+                loc = player.getLocation();
+            } else {
+                loc = cp.getClan().getHomeLocation();
+            }
+            
+            if(loc == null) {
+                ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("hombase.not.set"));
+                return;
+            }
+            
+            HomeRegroupEvent homeRegroupEvent = new HomeRegroupEvent(clan, cp, clan.getOnlineMembers(), loc);
+            SimpleClans.getInstance().getServer().getPluginManager().callEvent(homeRegroupEvent);
+
+            if (homeRegroupEvent.isCancelled() || !plugin.getClanManager().purchaseHomeRegroup(player)) {
+                return;
             }
 
-            List<ClanPlayer> members = clan.getAllMembers();
+            List<ClanPlayer> members = clan.getOnlineMembers();
             for (ClanPlayer ccp : members) {
                 Player pl = ccp.toPlayer();
-                if (pl == null || pl.equals(player)) {
+                if (pl == null) {
                     continue;
                 }
                 int x = loc.getBlockX();
@@ -186,12 +185,10 @@ public class HomeCommand {
                 }
                 x = x + xx;
                 z = z + zz;
-                pl.teleport(new Location(loc.getWorld(), x + .5, loc.getBlockY(), z + .5));
+                
+                plugin.getTeleportManager().addPlayer(player, new Location(loc.getWorld(), x + .5, loc.getBlockY(), z + .5), clan.getName());
             }
-            ChatBlock.sendMessage(player, ChatColor.AQUA + plugin.getLang("hombase.set") + ChatColor.YELLOW + Helper.toLocationString(loc));
             return;
         }
-
-        ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("insufficient.permissions"));
     }
 }

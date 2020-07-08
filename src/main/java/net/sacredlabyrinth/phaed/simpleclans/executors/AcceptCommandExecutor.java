@@ -20,7 +20,7 @@ public class AcceptCommandExecutor implements CommandExecutor {
     public boolean onCommand(CommandSender commandSender, Command command, String s, String[] strings) {
         Player player = (Player) commandSender;
 
-        if (plugin.getSettingsManager().isBanned(player.getName())) {
+        if (plugin.getSettingsManager().isBanned(player.getUniqueId())) {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("banned"));
             return false;
         }
@@ -42,19 +42,16 @@ public class AcceptCommandExecutor implements CommandExecutor {
                 ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("you.have.already.voted"));
                 return false;
             }
-            plugin.getRequestManager().accept(cp);
-            clan.leaderAnnounce(ChatColor.GREEN + MessageFormat.format(plugin.getLang("voted.to.accept"), Helper.capitalize(player.getName())));
+            
+            clan.leaderAnnounce(ChatColor.GREEN + MessageFormat.format(plugin.getLang("voted.to.accept"), player.getName()));
+			plugin.getRequestManager().accept(cp);
         } else {
             if (!plugin.getRequestManager().hasRequest(player.getName().toLowerCase())) {
                 ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("nothing.to.accept"));
                 return false;
             }
-            if (SimpleClans.getInstance().hasUUID()) {
-                cp = plugin.getClanManager().getCreateClanPlayer(player.getUniqueId());
-                cp.setName(player.getName());
-            } else {
-                cp = plugin.getClanManager().getCreateClanPlayer(player.getName());
-            }
+            cp = plugin.getClanManager().getCreateClanPlayer(player.getUniqueId());
+            cp.setName(player.getName());
             plugin.getRequestManager().accept(cp);
         }
 

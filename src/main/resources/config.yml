@@ -13,7 +13,7 @@ tag:
         leader-color: '4'
         char: ' .'
 settings:
-    online-mode: true
+    enable-gui: true
     disable-messages: false
     tameable-mobs-sharing: false
     teleport-blocks: false
@@ -39,17 +39,29 @@ settings:
     - vip
     - clan
     language: en
+    language-per-player: false
     disallowed-tag-colors:
     - '4'
     server-name: '&4SimpleClans'
     new-clan-verification-required: true
     allow-regroup-command: true
-spout:
-    in-game-tags: true
-    alert-url: ''
-    default-cape-url: http://i.imgur.com/pjqV6.png
-    enable-clan-capes: true
-    in-game-tags-colored: false
+    allow-reset-kdr: false
+    rejoin-cooldown: 60
+    rejoin-cooldown-enabled: false
+kdr-grinding-prevention:
+    enable-max-kills: false
+    max-kills-per-victim: 10
+    enable-kill-delay: false
+    delay-between-kills: 5
+list:
+    size: size
+    kdr: kdr
+    name: name
+    founded: founded
+    active: active
+    asc: asc
+    desc: desc
+    default: kdr
 commands:
     more: more
     ally: ally
@@ -57,6 +69,7 @@ commands:
     accept: accept
     deny: deny
     global: global
+    clan_chat: "."
     force-priority: true
 economy:
     creation-price: 100.0
@@ -69,24 +82,52 @@ economy:
     purchase-home-teleport: false
     home-teleport-set-price: 5.0
     purchase-home-teleport-set: false
+    home-regroup-price: 5.0
+    purchase-home-regroup: false
+    unique-tax-on-regroup: true
+    issuer-pays-regroup: true
     money-per-kill: false
     money-per-kill-kdr-multipier: 10
+    purchase-reset-kdr: true
+    reset-kdr-price: 10000.0
+    purchase-member-fee-set: false
+    member-fee-set-price: 1000.0
+    member-fee-enabled: false
+    max-member-fee: 200.0
+    upkeep: 200.0
+    upkeep-enabled: false
+    multiply-upkeep-by-clan-size: false
+    charge-upkeep-only-if-member-fee-enabled: true
 kill-weights:
     rival: 2.0
     civilian: 0.0
     neutral: 1.0
+    deny-same-ip-kills: false
 clan:
     homebase-teleport-wait-secs: 10
     homebase-can-be-set-only-once: true
     min-size-to-set-rival: 3
     max-length: 25
+    max-description-length: 120
+    min-description-length: 10
     max-members: 25
     confirmation-for-promote: false
     trust-members-by-default: false
     confirmation-for-demote: false
+    percentage-online-to-demote: 100.0
     ff-on-by-default: false
     min-length: 2
     min-size-to-set-ally: 3
+tasks:
+    collect-upkeep:
+        hour: 1
+        minute: 30
+    collect-upkeep-warning:
+        hour: 12
+        minute: 0
+    collect-fee:
+        hour: 1
+        minute: 0
 page:
     untrusted-color: '8'
     clan-name-color: b
@@ -97,19 +138,14 @@ page:
     separator: '-'
     size: 100
 clanchat:
-    rank.color: e
-    tag-based-clan-chat: false
-    name-color: e
-    player-bracket:
-        left: '<'
-        right: '>'
-    announcement-color: e
-    message-color: b
-    tag-bracket:
-        color: e
-        left: '['
-        right: ']'
     enable: true
+    tag-based-clan-chat: false
+    announcement-color: e
+    format: "&b[%clan%&b] &4<%nick-color%%player%&4> %rank%: &b%message%"
+    rank: "&f[%rank%&f]"
+    leader-color: '4'
+    trusted-color: 'f'
+    member-color: '7'
 request:
     message-color: b
     ask-frequency-secs: 60
@@ -119,18 +155,14 @@ bb:
     accent-color: '8'
     show-on-login: true
     size: 6
+    login-size: 6
 allychat:
-    tag-color: b
-    name-color: f
-    player-bracket:
-        left: <
-        right: '>'
-    message-color: '3'
-    tag-bracket:
-        color: '8'
-        left: '['
-        right: ']'
     enable: true
+    format: "&b[Ally Chat] &4<%clan%&4> <%nick-color%%player%&4> %rank%: &b%message%"
+    rank: "&f[%rank%&f]"
+    leader-color: '4'
+    trusted-color: 'f'
+    member-color: '7'
 purge:
     inactive-player-data-days: 30
     inactive-clan-days: 7
@@ -147,5 +179,7 @@ permissions:
   YourClanNameHere:
   - test.permission
 performance:
-  use-threads: false
+  save-periodically: true
+  save-interval: 10
+  use-threads: true
   use-bungeecord: false

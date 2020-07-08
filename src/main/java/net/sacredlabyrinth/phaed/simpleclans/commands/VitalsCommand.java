@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author phaed
@@ -43,17 +42,18 @@ public class VitalsCommand {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("clan.is.not.verified"));
             return;
         }
-        if (!cp.isTrusted()) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("only.trusted.players.can.access.clan.vitals"));
-            return;
+        
+        if (!plugin.getPermissionsManager().has(player, RankPermission.VITALS, PermissionLevel.TRUSTED, true)) {
+        	return;
         }
+
         if (arg.length != 0) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.0.vitals"), plugin.getSettingsManager().getCommandClan()));
             return;
         }
         ChatBlock chatBlock = new ChatBlock();
         ChatBlock.sendBlank(player);
-        ChatBlock.saySingle(player, plugin.getSettingsManager().getPageClanNameColor() + Helper.capitalize(clan.getName()) + subColor + " " + plugin.getLang("vitals") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
+        ChatBlock.saySingle(player, plugin.getSettingsManager().getPageClanNameColor() + clan.getName() + subColor + " " + plugin.getLang("vitals") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
         ChatBlock.sendBlank(player);
         ChatBlock.sendMessage(player, headColor + plugin.getLang("weapons") + ": " + MessageFormat.format(plugin.getLang("0.s.sword.1.2.b.bow.3.4.a.arrow"), ChatColor.WHITE, ChatColor.DARK_GRAY, ChatColor.WHITE, ChatColor.DARK_GRAY, ChatColor.WHITE));
         ChatBlock.sendMessage(player, headColor + plugin.getLang("materials") + ": " + ChatColor.AQUA + plugin.getLang("diamond") + ChatColor.DARK_GRAY + ", " + ChatColor.YELLOW + plugin.getLang("gold") + ChatColor.DARK_GRAY + ", " + ChatColor.GRAY + plugin.getLang("stone") + ChatColor.DARK_GRAY + ", " + ChatColor.WHITE + plugin.getLang("iron") + ChatColor.DARK_GRAY + ", " + ChatColor.GOLD + plugin.getLang("wood"));

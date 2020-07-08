@@ -1,12 +1,15 @@
 package net.sacredlabyrinth.phaed.simpleclans.commands;
 
 import net.sacredlabyrinth.phaed.simpleclans.*;
+import net.sacredlabyrinth.phaed.simpleclans.uuid.UUIDMigration;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.util.UUID;
 
 /**
  * @author phaed
@@ -46,8 +49,13 @@ public class LookupCommand {
             return;
         }
 
-        ClanPlayer targetCp = plugin.getClanManager().getAnyClanPlayer(playerName);
-        ClanPlayer myCp = plugin.getClanManager().getClanPlayer(player.getName());
+        UUID targetUuid = UUIDMigration.getForcedPlayerUUID(playerName);
+        if (targetUuid == null) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
+            return;
+        }
+        ClanPlayer targetCp = plugin.getClanManager().getAnyClanPlayer(targetUuid);
+        ClanPlayer myCp = plugin.getClanManager().getClanPlayer(player.getUniqueId());
         Clan myClan = myCp == null ? null : myCp.getClan();
 
         if (targetCp != null) {
@@ -64,7 +72,7 @@ public class LookupCommand {
             }
 
             String status = targetClan == null ? ChatColor.WHITE + plugin.getLang("free.agent") : (targetCp.isLeader() ? plugin.getSettingsManager().getPageLeaderColor() + plugin.getLang("leader") : (targetCp.isTrusted() ? plugin.getSettingsManager().getPageTrustedColor() + plugin.getLang("trusted") : plugin.getSettingsManager().getPageUnTrustedColor() + plugin.getLang("untrusted")));
-            String rank = ChatColor.WHITE + "" + Helper.parseColors(targetCp.getRank());
+            String rank = ChatColor.WHITE + "" + Helper.parseColors(targetCp.getRankDisplayName());
             String joinDate = ChatColor.WHITE + "" + targetCp.getJoinDateString();
             String lastSeen = ChatColor.WHITE + "" + targetCp.getLastSeenString();
             String inactive = ChatColor.WHITE + "" + targetCp.getInactiveDays() + subColor + "/" + ChatColor.WHITE + plugin.getSettingsManager().getPurgePlayers() + " days";

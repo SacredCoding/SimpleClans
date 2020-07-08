@@ -10,6 +10,8 @@ import org.json.simple.JSONValue;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.text.MessageFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 /**
@@ -32,6 +34,7 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
     private long lastSeen;
     private long joinDate;
     private Set<String> pastClans = new HashSet<>();
+    private Map<String, Long> resignTimes = new HashMap<>();
     private VoteResult vote;
     private Channel channel;
 
@@ -116,15 +119,8 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
     }
 
     @Override
-    public int compareTo(ClanPlayer other)
-    {
-        if (SimpleClans.getInstance().hasUUID())
-        {
-            return this.getUniqueId().compareTo(other.getUniqueId());
-        } else
-        {
-            return this.getName().compareToIgnoreCase(other.getName());
-        }
+    public int compareTo(ClanPlayer other) {
+    	return this.getUniqueId().compareTo(other.getUniqueId());
     }
 
     @Override
@@ -329,6 +325,7 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
     /**
      * Adds one rival kill to this player (does not update clanplayer to db)
      */
+    @Deprecated
     public void addRivalKill()
     {
         setRivalKills(getRivalKills() + 1);
@@ -357,6 +354,7 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
     /**
      * Adds one civilian kill to this player (does not update clanplayer to db)
      */
+    @Deprecated
     public void addCivilianKill()
     {
         setCivilianKills(getCivilianKills() + 1);
@@ -385,9 +383,26 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
     /**
      * Adds one civilian kill to this player (does not update clanplayer to db)
      */
+    @Deprecated
     public void addNeutralKill()
     {
         setNeutralKills(getNeutralKills() + 1);
+    }
+    
+    /**
+     * Adds one kill to this player (does not update to db)
+     */
+    public void addKill(Kill.Type type) {
+    	switch (type) {
+    		case CIVILIAN:
+    			civilianKills++;
+    			break;
+    		case NEUTRAL:
+    			neutralKills++;
+    			break;
+    		case RIVAL:
+    			rivalKills++;
+    	}
     }
 
     /**
@@ -528,6 +543,9 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
      */
     public String getLastSeenString()
     {
+    	if (toPlayer() != null) {
+    		return SimpleClans.getInstance().getLang("online");
+    	}
         return new java.text.SimpleDateFormat("MMM dd, ''yy h:mm a").format(new Date(this.lastSeen));
     }
 
@@ -623,9 +641,55 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
      */
     public Set<String> getPastClans()
     {
-        HashSet<String> pc = new HashSet<>();
-        pc.addAll(pastClans);
-        return pc;
+//        HashSet<String> pc = new HashSet<>();
+//        pc.addAll(pastClans);
+//        return pc;
+        return pastClans;
+    }
+    
+    /**
+     * Returns a map containing the time the player resigned from certain clans
+     * 
+     * @return the resign times
+     */
+    public Map<String, Long> getResignTimes() {
+    	return resignTimes;
+    }
+    
+    /**
+     * Returns the time in millis when the player resigned from the clan
+     * 
+     * @param tag
+     * @return the time in millis
+     */
+    public Long getResignTime(String tag) {
+    	return resignTimes.get(tag);
+    }
+    
+    /**
+     * Sets the resign times (does not update to db)
+     * 
+     * @param resignTimes
+     */
+    public void setResignTimes(Map<String, Long> resignTimes) {
+    	if (resignTimes != null) {
+    		final int cooldown = SimpleClans.getInstance().getSettingsManager().getRejoinCooldown();
+    		resignTimes.forEach((k, v) -> {
+    			long timePassed = Instant.ofEpochMilli(v).until(Instant.now(), ChronoUnit.MINUTES);
+    			if (timePassed < cooldown) {
+    				this.resignTimes.put(k, v);
+    			}
+    		});
+    	}
+    }
+    
+    /**
+     * Adds the clan to the resign times map
+     * 
+     * @param tag
+     */
+    public void addResignTime(String tag) {
+    	if (tag != null) resignTimes.put(tag, System.currentTimeMillis());
     }
 
     /**
@@ -707,7 +771,8 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
      *
      * @return the flags
      */
-    public String getFlags()
+    @SuppressWarnings("unchecked")
+	public String getFlags()
     {
         JSONObject json = new JSONObject();
 
@@ -915,13 +980,46 @@ public class ClanPlayer implements Serializable, Comparable<ClanPlayer>
         return useChatShortcut;
     }
 
+    public String getRankDisplayName() {
+    	if (clan != null) {
+    		Rank r = clan.getRank(rank);
+    		if (r != null) {
+    			return r.getDisplayName();
+    		}
+    	}
+    	return "";
+    }
+    
+    /**
+     * Gets the rank id
+     * 
+     * @return
+     */
+    public String getRankId() {
+    	return rank;
+    }
+    
+    /**
+     * Gets the rank displayname
+     * 
+     * @return
+     */
+    @Deprecated
     public String getRank()
     {
-        return rank;
+        return getRankDisplayName();
     }
 
+    /**
+     * Sets the rank id
+     * 
+     * @param rank the rank id
+     */
     public void setRank(String rank)
     {
+    	if (rank == null) {
+    		rank = "";
+    	}
         this.rank = rank;
     }
 

@@ -1,3 +1,7 @@
 /target/
 /.idea/
 SimpleClans.iml
+/bin/
+/.classpath
+/.project
+/dependency-reduced-pom.xml

@@ -46,9 +46,8 @@ public class StatsCommand {
             return;
         }
 
-        if (!cp.isTrusted()) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("only.trusted.players.can.access.clan.stats"));
-            return;
+        if (!plugin.getPermissionsManager().has(player, RankPermission.STATS, PermissionLevel.TRUSTED, true)) {
+        	return;
         }
 
         if (arg.length != 0) {
@@ -57,7 +56,7 @@ public class StatsCommand {
         }
 
         ChatBlock chatBlock = new ChatBlock();
-        ChatBlock.saySingle(player, plugin.getSettingsManager().getPageClanNameColor() + Helper.capitalize(clan.getName()) + subColor + " " + plugin.getLang("stats") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
+        ChatBlock.saySingle(player, plugin.getSettingsManager().getPageClanNameColor() + clan.getName() + subColor + " " + plugin.getLang("stats") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
         ChatBlock.sendBlank(player);
         ChatBlock.sendMessage(player, headColor + plugin.getLang("kdr") + " = " + subColor + plugin.getLang("kill.death.ratio"));
         ChatBlock.sendMessage(player, headColor + plugin.getLang("weights") + " = " + plugin.getLang("rival") + ": " + subColor + plugin.getSettingsManager().getKwRival() + headColor + " " + plugin.getLang("neutral") + ": " + subColor + plugin.getSettingsManager().getKwNeutral() + headColor + " " + plugin.getLang("civilian") + ": " + subColor + plugin.getSettingsManager().getKwCivilian());

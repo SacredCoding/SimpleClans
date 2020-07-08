@@ -4,6 +4,8 @@ import net.sacredlabyrinth.phaed.simpleclans.ChatBlock;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.Helper;
+import net.sacredlabyrinth.phaed.simpleclans.PermissionLevel;
+import net.sacredlabyrinth.phaed.simpleclans.RankPermission;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -44,10 +46,10 @@ public class ModtagCommand {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("clan.is.not.verified"));
             return;
         }
-        if (!clan.isLeader(player)) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
-            return;
+        if (!plugin.getPermissionsManager().has(player, RankPermission.MODTAG, PermissionLevel.LEADER, true)) {
+        	return;
         }
+
         if (arg.length != 1) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.0.modtag.tag"), plugin.getSettingsManager().getCommandClan()));
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("example.clan.modtag.4kfo.4l"));
@@ -57,6 +59,10 @@ public class ModtagCommand {
         String newtag = arg[0];
         String cleantag = Helper.cleanTag(newtag);
 
+        if (!plugin.getPermissionsManager().has(player, "simpleclans.leader.coloredtag") && newtag.contains("&")) {
+            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("your.tag.cannot.contain.color.codes"));
+            return;
+        }
         if (Helper.stripColors(newtag).length() > plugin.getSettingsManager().getTagMaxLength()) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("your.clan.tag.cannot.be.longer.than.characters"), plugin.getSettingsManager().getTagMaxLength()));
             return;

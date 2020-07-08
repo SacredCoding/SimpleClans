@@ -1,21 +1,22 @@
 package net.sacredlabyrinth.phaed.simpleclans.managers;
 
-import net.sacredlabyrinth.phaed.simpleclans.Helper;
-import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
-import net.sacredlabyrinth.phaed.simpleclans.uuid.UUIDMigration;
-import org.bukkit.configuration.file.FileConfiguration;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+
+import org.bukkit.configuration.file.FileConfiguration;
+
+import net.sacredlabyrinth.phaed.simpleclans.Helper;
+import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 
 /**
  * @author phaed
  */
 public final class SettingsManager {
-    private boolean onlineMode;
+	private boolean enableGUI;
     private boolean disableMessages;
     private String clanChatRankColor;
     private boolean tagBasedClanChat;
@@ -23,15 +24,27 @@ public final class SettingsManager {
     private boolean dropOnHome;
     private boolean keepOnHome;
     private boolean debugging;
-    private SimpleClans plugin;
+    private final SimpleClans plugin;
     private boolean mChatIntegration;
     private boolean pvpOnlywhileInWar;
     private boolean useColorCodeFromPrefix;
     private boolean confirmationForPromote;
     private boolean confirmationForDemote;
+    private double percentageOnlineToDemote;
     private boolean globalff;
+    private boolean allowResetKdr;
     private boolean showUnverifiedOnList;
     private boolean requireVerification;
+    private boolean rejoinCooldownEnabled;
+    private int rejoinCooldown;
+    private String listDefault;
+    private String listSize;
+    private String listKdr;
+    private String listName;
+    private String listFounded;
+    private String listActive;
+    private String listAsc;
+    private String listDesc;
     private List<Integer> itemsList;
     private List<String> blacklistedWorlds;
     private List<String> bannedPlayers;
@@ -43,17 +56,26 @@ public final class SettingsManager {
     private boolean ePurchaseVerification;
     private boolean ePurchaseInvite;
     private boolean ePurchaseHomeTeleport;
+    private boolean ePurchaseHomeRegroup;
+    private boolean eUniqueTaxOnRegroup;
+    private boolean eIssuerPaysRegroup;
     private boolean ePurchaseHomeTeleportSet;
+    private boolean ePurchaseResetKdr;
+    private boolean eMemberFee;
+    private boolean ePurchaseMemberFeeSet;
+    private boolean eClanUpkeepEnabled;
+    private boolean eMultiplyUpkeepBySize;
+    private boolean eChargeUpkeepOnlyIfMemberFeeEnabled;
     private double eCreationPrice;
     private double eVerificationPrice;
     private double eInvitePrice;
     private double eHomeTeleportPrice;
+    private double eHomeRegroupPrice;
     private double eHomeTeleportPriceSet;
-    private String alertUrl;
-    private boolean inGameTags;
-    private boolean inGameTagsColored;
-    private boolean clanCapes;
-    private String defaultCapeUrl;
+    private double eResetKdr;
+    private double eMaxMemberFee;
+    private double eMemberFeeSetPrice;
+    private double eClanUpkeep;
     private String serverName;
     private boolean chatTags;
     private int purgeClan;
@@ -70,6 +92,7 @@ public final class SettingsManager {
     private String pageUnTrustedColor;
     private boolean bbShowOnLogin;
     private int bbSize;
+    private int bbLoginSize;
     private String bbColor;
     private String bbAccentColor;
     private String commandClan;
@@ -78,10 +101,13 @@ public final class SettingsManager {
     private String commandMore;
     private String commandDeny;
     private String commandAccept;
+    private String commandClanChat;
     private int clanMinSizeToAlly;
     private int clanMinSizeToRival;
     private int clanMinLength;
     private int clanMaxLength;
+    private int clanMaxDescriptionLength;
+    private int clanMinDescriptionLength;
     private String pageClanNameColor;
     private int tagMinLength;
     private int tagMaxLength;
@@ -95,6 +121,11 @@ public final class SettingsManager {
     private String tagBracketLeaderColor;
     private boolean clanTrustByDefault;
     private boolean allyChatEnable;
+    private String allyChatFormat;
+    private String allyChatRank;
+    private String allyChatLeaderColor;
+    private String allyChatTrustedColor;
+    private String allyChatMemberColor;
     private String allyChatMessageColor;
     private String allyChatNameColor;
     private String allyChatTagColor;
@@ -104,6 +135,11 @@ public final class SettingsManager {
     private String allyChatPlayerBracketLeft;
     private String allyChatPlayerBracketRight;
     private boolean clanChatEnable;
+    private String clanChatFormat;
+    private String clanChatRank;
+    private String clanChatLeaderColor;
+    private String clanChatTrustedColor;
+    private String clanChatMemberColor;
     private String clanChatAnnouncementColor;
     private String clanChatMessageColor;
     private String clanChatNameColor;
@@ -112,6 +148,12 @@ public final class SettingsManager {
     private String clanChatBracketColor;
     private String clanChatPlayerBracketLeft;
     private String clanChatPlayerBracketRight;
+    private int tasksCollectUpkeepHour;
+    private int tasksCollectUpkeepMinute;
+    private int tasksCollectUpkeepWarningHour;
+    private int tasksCollectUpkeepWarningMinute;
+    private int tasksCollectFeeHour;
+    private int tasksCollectFeeMinute;
     private boolean clanFFOnByDefault;
     private double kwRival;
     private double kwNeutral;
@@ -123,12 +165,13 @@ public final class SettingsManager {
     private String username;
     private String password;
     private boolean safeCivilians;
-    private File main;
-    private FileConfiguration config;
+    private final File main;
+    private final FileConfiguration config;
     private boolean compatMode;
     private boolean homebaseSetOnce;
     private int waitSecs;
     private boolean enableAutoGroups;
+    private boolean denySameIPKills;
     private boolean moneyperkill;
     private double KDRMultipliesPerKill;
     private boolean teleportBlocks;
@@ -140,6 +183,14 @@ public final class SettingsManager {
     private boolean forceCommandPriority;
     private int maxAsksPerRequest;
     private int maxMembers;
+    private boolean maxKillsPerVictimEnabled;
+    private int maxKillsPerVictim;
+    private boolean delayBetweenKillsEnabled;
+    private int delayBetweenKills;
+	private String language;
+	private boolean languagePerPlayer;
+	private boolean savePeriodically;
+	private int saveInterval;
 
     /**
      *
@@ -155,6 +206,7 @@ public final class SettingsManager {
      * Load the configuration
      */
 
+    @SuppressWarnings({"CallToPrintStackTrace", "UseSpecificCatch"})
     public void load() {
         boolean exists = (main).exists();
 
@@ -169,7 +221,7 @@ public final class SettingsManager {
             getConfig().options().copyDefaults(true);
         }
 
-        onlineMode = getConfig().getBoolean("settings.online-mode");
+        enableGUI = getConfig().getBoolean("settings.enable-gui");
         disableMessages = getConfig().getBoolean("settings.disable-messages");
         teleportOnSpawn = getConfig().getBoolean("settings.teleport-home-on-spawn");
         dropOnHome = getConfig().getBoolean("settings.drop-items-on-clan-home");
@@ -181,6 +233,7 @@ public final class SettingsManager {
         enableAutoGroups = getConfig().getBoolean("settings.enable-auto-groups");
         useColorCodeFromPrefix = getConfig().getBoolean("settings.use-colorcode-from-prefix-for-name");
         bannedPlayers = getConfig().getStringList("settings.banned-players");
+        allowResetKdr = getConfig().getBoolean("settings.allow-reset-kdr");
         compatMode = getConfig().getBoolean("settings.chat-compatibility-mode");
         disallowedColors = getConfig().getStringList("settings.disallowed-tag-colors");
         blacklistedWorlds = getConfig().getStringList("settings.blacklisted-worlds");
@@ -188,6 +241,16 @@ public final class SettingsManager {
         unRivableClans = getConfig().getStringList("settings.unrivable-clans");
         showUnverifiedOnList = getConfig().getBoolean("settings.show-unverified-on-list");
         requireVerification = getConfig().getBoolean("settings.new-clan-verification-required");
+        rejoinCooldown = getConfig().getInt("settings.rejoin-cooldown");
+        rejoinCooldownEnabled = getConfig().getBoolean("settings.rejoin-cooldown-enabled");
+        listActive = getConfig().getString("list.active", "active");
+        listKdr = getConfig().getString("list.kdr", "kdr");
+        listDefault = getConfig().getString("list.default", listKdr);
+        listSize = getConfig().getString("list.size", "size");
+        listName = getConfig().getString("list.name", "name");
+        listFounded = getConfig().getString("list.founded", "founded");
+        listAsc = getConfig().getString("list.asc", "asc");
+        listDesc = getConfig().getString("list.desc", "desc");
         serverName = getConfig().getString("settings.server-name");
         chatTags = getConfig().getBoolean("settings.display-chat-tags");
         rivalLimitPercent = getConfig().getInt("settings.rival-limit-percent");
@@ -195,17 +258,26 @@ public final class SettingsManager {
         ePurchaseVerification = getConfig().getBoolean("economy.purchase-clan-verify");
         ePurchaseInvite = getConfig().getBoolean("economy.purchase-clan-invite");
         ePurchaseHomeTeleport = getConfig().getBoolean("economy.purchase-home-teleport");
+        ePurchaseHomeRegroup = getConfig().getBoolean("economy.purchase-home-regroup");
         ePurchaseHomeTeleportSet = getConfig().getBoolean("economy.purchase-home-teleport-set");
+        ePurchaseResetKdr = getConfig().getBoolean("economy.purchase-reset-kdr");
+        ePurchaseMemberFeeSet = getConfig().getBoolean("economy.purchase-member-fee-set");
+        eMemberFeeSetPrice = getConfig().getDouble("economy.member-fee-set-price");
+        eResetKdr = getConfig().getDouble("economy.reset-kdr-price");
         eCreationPrice = getConfig().getDouble("economy.creation-price");
         eVerificationPrice = getConfig().getDouble("economy.verification-price");
         eInvitePrice = getConfig().getDouble("economy.invite-price");
         eHomeTeleportPrice = getConfig().getDouble("economy.home-teleport-price");
+        eHomeRegroupPrice = getConfig().getDouble("economy.home-regroup-price");
+        eUniqueTaxOnRegroup = getConfig().getBoolean("economy.unique-tax-on-regroup");
+        eIssuerPaysRegroup = getConfig().getBoolean("economy.issuer-pays-regroup");
         eHomeTeleportPriceSet = getConfig().getDouble("economy.home-teleport-set-price");
-        alertUrl = getConfig().getString("spout.alert-url");
-        inGameTags = getConfig().getBoolean("spout.in-game-tags");
-        inGameTagsColored = getConfig().getBoolean("spout.in-game-tags-colored");
-        clanCapes = getConfig().getBoolean("spout.enable-clan-capes");
-        defaultCapeUrl = getConfig().getString("spout.default-cape-url");
+        eMaxMemberFee = getConfig().getDouble("economy.max-member-fee");
+        eClanUpkeep = getConfig().getDouble("economy.upkeep");
+        eClanUpkeepEnabled = getConfig().getBoolean("economy.upkeep-enabled");
+        eChargeUpkeepOnlyIfMemberFeeEnabled = getConfig().getBoolean("economy.charge-upkeep-only-if-member-fee-enabled");
+        eMultiplyUpkeepBySize = getConfig().getBoolean("economy.multiply-upkeep-by-clan-size");
+        eMemberFee = getConfig().getBoolean("economy.member-fee-enabled");
         purgeClan = getConfig().getInt("purge.inactive-clan-days");
         purgeUnverified = getConfig().getInt("purge.unverified-clan-days");
         purgePlayers = getConfig().getInt("purge.inactive-player-data-days");
@@ -222,6 +294,7 @@ public final class SettingsManager {
         pageClanNameColor = getConfig().getString("page.clan-name-color");
         bbShowOnLogin = getConfig().getBoolean("bb.show-on-login");
         bbSize = getConfig().getInt("bb.size");
+        bbLoginSize = getConfig().getInt("bb.login-size", bbSize);
         bbColor = getConfig().getString("bb.color");
         bbAccentColor = getConfig().getString("bb.accent-color");
         commandClan = getConfig().getString("commands.clan");
@@ -230,16 +303,20 @@ public final class SettingsManager {
         commandMore = getConfig().getString("commands.more");
         commandDeny = getConfig().getString("commands.deny");
         commandAccept = getConfig().getString("commands.accept");
+        commandClanChat = getConfig().getString("commands.clan_chat");
         forceCommandPriority = getConfig().getBoolean("commands.force-priority");
         homebaseSetOnce = getConfig().getBoolean("clan.homebase-can-be-set-only-once");
         waitSecs = getConfig().getInt("clan.homebase-teleport-wait-secs");
         confirmationForPromote = getConfig().getBoolean("clan.confirmation-for-demote");
         confirmationForDemote = getConfig().getBoolean("clan.confirmation-for-promote");
+        percentageOnlineToDemote = getConfig().getDouble("clan.percentage-online-to-demote");
         clanTrustByDefault = getConfig().getBoolean("clan.trust-members-by-default");
         clanMinSizeToAlly = getConfig().getInt("clan.min-size-to-set-ally");
         clanMinSizeToRival = getConfig().getInt("clan.min-size-to-set-rival");
         clanMinLength = getConfig().getInt("clan.min-length");
         clanMaxLength = getConfig().getInt("clan.max-length");
+        clanMaxDescriptionLength = getConfig().getInt("clan.max-description-length");
+        clanMinDescriptionLength = getConfig().getInt("clan.min-description-length");
         clanFFOnByDefault = getConfig().getBoolean("clan.ff-on-by-default");
         tagMinLength = getConfig().getInt("tag.min-length");
         tagMaxLength = getConfig().getInt("tag.max-length");
@@ -252,6 +329,11 @@ public final class SettingsManager {
         tagBracketLeft = getConfig().getString("tag.bracket.left");
         tagBracketRight = getConfig().getString("tag.bracket.right");
         allyChatEnable = getConfig().getBoolean("allychat.enable");
+        allyChatFormat = getConfig().getString("allychat.format");
+        allyChatRank = getConfig().getString("allychat.rank");
+        allyChatLeaderColor = getConfig().getString("allychat.leader-color");
+        allyChatTrustedColor = getConfig().getString("allychat.trusted-color");
+        allyChatMemberColor = getConfig().getString("allychat.member-color");
         allyChatMessageColor = getConfig().getString("allychat.message-color");
         allyChatTagColor = getConfig().getString("allychat.tag-color");
         allyChatNameColor = getConfig().getString("allychat.name-color");
@@ -261,6 +343,11 @@ public final class SettingsManager {
         allyChatPlayerBracketLeft = getConfig().getString("allychat.player-bracket.left");
         allyChatPlayerBracketRight = getConfig().getString("allychat.player-bracket.right");
         clanChatEnable = getConfig().getBoolean("clanchat.enable");
+        clanChatFormat = getConfig().getString("clanchat.format");
+        clanChatRank = getConfig().getString("clanchat.rank");
+        clanChatLeaderColor = getConfig().getString("clanchat.leader-color");
+        clanChatTrustedColor = getConfig().getString("clanchat.trusted-color");
+        clanChatMemberColor = getConfig().getString("clanchat.member-color");
         tagBasedClanChat = getConfig().getBoolean("clanchat.tag-based-clan-chat");
         clanChatAnnouncementColor = getConfig().getString("clanchat.announcement-color");
         clanChatMessageColor = getConfig().getString("clanchat.message-color");
@@ -271,9 +358,16 @@ public final class SettingsManager {
         clanChatTagBracketRight = getConfig().getString("clanchat.tag-bracket.right");
         clanChatPlayerBracketLeft = getConfig().getString("clanchat.player-bracket.left");
         clanChatPlayerBracketRight = getConfig().getString("clanchat.player-bracket.right");
+        tasksCollectFeeHour = getConfig().getInt("tasks.collect-fee.hour");
+        tasksCollectFeeMinute = getConfig().getInt("tasks.collect-fee.minute");
+        tasksCollectUpkeepHour = getConfig().getInt("tasks.collect-upkeep.hour");
+        tasksCollectUpkeepMinute = getConfig().getInt("tasks.collect-upkeep.minute");
+        tasksCollectUpkeepWarningHour = getConfig().getInt("tasks.collect-upkeep-warning.hour");
+        tasksCollectUpkeepWarningMinute = getConfig().getInt("tasks.collect-upkeep-warning.minute");
         kwRival = getConfig().getDouble("kill-weights.rival");
         kwNeutral = getConfig().getDouble("kill-weights.neutral");
         kwCivilian = getConfig().getDouble("kill-weights.civilian");
+        denySameIPKills = getConfig().getBoolean("kill-weights.deny-same-ip-kills");
         useMysql = getConfig().getBoolean("mysql.enable");
         host = getConfig().getString("mysql.host");
         port = getConfig().getInt("mysql.port");
@@ -285,13 +379,21 @@ public final class SettingsManager {
         moneyperkill = getConfig().getBoolean("economy.money-per-kill");
         KDRMultipliesPerKill = getConfig().getDouble("economy.money-per-kill-kdr-multipier");
         teleportBlocks = getConfig().getBoolean("settings.teleport-blocks");
+        language = getConfig().getString("settings.language", "");
+        languagePerPlayer = getConfig().getBoolean("settings.language-per-player", false);
         AutoGroupGroupName = getConfig().getBoolean("permissions.auto-group-groupname");
         tamableMobsSharing = getConfig().getBoolean("settings.tameable-mobs-sharing");
         allowReGroupCommand = getConfig().getBoolean("settings.allow-regroup-command");
+        savePeriodically = getConfig().getBoolean("performance.save-periodically");
+        saveInterval = getConfig().getInt("performance.save-interval");
         useThreads = getConfig().getBoolean("performance.use-threads");
         useBungeeCord = getConfig().getBoolean("performance.use-bungeecord");
         maxMembers = getConfig().getInt("clan.max-members");
-
+        maxKillsPerVictim = getConfig().getInt("kdr-grinding-prevention.max-kills-per-victim");
+        maxKillsPerVictimEnabled = getConfig().getBoolean("kdr-grinding-prevention.enable-max-kills");
+        delayBetweenKills = getConfig().getInt("kdr-grinding-prevention.delay-between-kills");
+        delayBetweenKillsEnabled = getConfig().getBoolean("kdr-grinding-prevention.enable-kill-delay");
+        
         // migrate from old way of adding ports
         if (database.contains(":")) {
             String[] strings = database.split(":");
@@ -302,12 +404,121 @@ public final class SettingsManager {
         save();
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     public void save() {
         try {
             getConfig().save(main);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public boolean isEnableGUI() {
+		return enableGUI;
+	}
+    
+    public void setEnableGUI(boolean enableGUI) {
+		this.enableGUI = enableGUI;
+        getConfig().set("settings.enable-gui", enableGUI);
+        save();
+    }
+    
+    public Locale getLanguage() {
+    	String[] split = language.split("_");
+    	
+    	if (split.length == 2) {
+    		return new Locale(split[0], split[1]);
+    	}
+
+    	return new Locale(language);
+    }
+    
+    public boolean isLanguagePerPlayer() {
+    	return languagePerPlayer;
+    }
+    
+    public int getTasksCollectUpkeepHour() {
+		return tasksCollectUpkeepHour;
+	}
+
+	public void setTasksCollectUpkeepHour(int tasksCollectUpkeepHour) {
+		this.tasksCollectUpkeepHour = tasksCollectUpkeepHour;
+	}
+
+	public int getTasksCollectUpkeepMinute() {
+		return tasksCollectUpkeepMinute;
+	}
+
+	public void setTasksCollectUpkeepMinute(int tasksCollectUpkeepMinute) {
+		this.tasksCollectUpkeepMinute = tasksCollectUpkeepMinute;
+	}
+
+	public int getTasksCollectUpkeepWarningHour() {
+		return tasksCollectUpkeepWarningHour;
+	}
+
+	public void setTasksCollectUpkeepWarningHour(int tasksCollectUpkeepWarningHour) {
+		this.tasksCollectUpkeepWarningHour = tasksCollectUpkeepWarningHour;
+	}
+
+	public int getTasksCollectUpkeepWarningMinute() {
+		return tasksCollectUpkeepWarningMinute;
+	}
+
+	public void setTasksCollectUpkeepWarningMinute(int tasksCollectUpkeepWarningMinute) {
+		this.tasksCollectUpkeepWarningMinute = tasksCollectUpkeepWarningMinute;
+	}
+
+	public int getTasksCollectFeeHour() {
+		return tasksCollectFeeHour;
+	}
+
+	public void setTasksCollectFeeHour(int tasksCollectFeeHour) {
+		this.tasksCollectFeeHour = tasksCollectFeeHour;
+	}
+
+	public int getTasksCollectFeeMinute() {
+		return tasksCollectFeeMinute;
+	}
+
+	public void setTasksCollectFeeMinute(int tasksCollectFeeMinute) {
+		this.tasksCollectFeeMinute = tasksCollectFeeMinute;
+	}
+	
+	/**
+     * Returns the delay between kills
+     * 
+     * @return
+     */
+    public int getDelayBetweenKills() {
+    	return delayBetweenKills;
+    }
+    
+    /**
+     * Checks if the delay between kills is enabled
+     * 
+     * @return
+     */
+    public boolean isDelayBetweenKills() {
+    	return delayBetweenKillsEnabled;
+    }
+    
+    /**
+     * Returns the max number of kills per victim
+     * 
+     * @return
+     */
+    public int getMaxKillsPerVictim() {
+    	return maxKillsPerVictim;
+    }
+    
+    /**
+     * Checks if there is a max number of kills per victim
+     * 
+     * @return
+     */
+    public boolean isMaxKillsPerVictim() {
+    	return maxKillsPerVictimEnabled;
     }
 
     /**
@@ -320,6 +531,14 @@ public final class SettingsManager {
         return itemsList.contains(typeId);
     }
 
+    /**
+     * Gets the command set as the clan chat command
+     * 
+     * @return the clan chat command
+     */
+    public String getCommandClanChat() {
+        return commandClanChat;
+    }
 
     /**
      * Check whether a worlds is blacklisted
@@ -353,7 +572,96 @@ public final class SettingsManager {
         return word.equalsIgnoreCase("clan") || word.equalsIgnoreCase(commandMore) || word.equalsIgnoreCase(commandDeny) || word.equalsIgnoreCase(commandAccept);
 
     }
+    
+    /**
+     * Checks if the upkeep is to be charged only from clans with the member fee enabled
+     * 
+     * @return
+     */
+    public boolean isChargeUpkeepOnlyIfMemberFeeEnabled() {
+    	return eChargeUpkeepOnlyIfMemberFeeEnabled;
+    }
+    
+    /**
+     * Checks if the upkeep should be multiplied by the clan size
+     * 
+     * @return 
+     */
+    public boolean isMultiplyUpkeepBySize() {
+        return eMultiplyUpkeepBySize;
+    }
+    
+    /**
+     * Checks if the upkeep is enabled
+     * 
+     * @return 
+     */
+    public boolean isClanUpkeep() {
+        return eClanUpkeepEnabled;
+    }
+    
+    /**
+     * Returns the upkeep
+     * 
+     * @return 
+     */
+    public double getClanUpkeep() {
+        if (eClanUpkeep < 0) {
+            eClanUpkeep = 0;
+        }
+        return eClanUpkeep;
+    }
+    
+    
+    /**
+     * Returns the max member fee allowed
+     * @return 
+     */
+    public double getMaxMemberFee() {
+        return eMaxMemberFee;
+    }
+    
+    /**
+     * Checks if the member fee is enabled
+     * @return 
+     */
+    public boolean isMemberFee() {
+        return eMemberFee;
+    }
 
+    public boolean isAllowResetKdr() {
+        return allowResetKdr;
+    }
+
+    public boolean isePurchaseResetKdr() {
+        return ePurchaseResetKdr;
+    }
+    
+    /**
+     * Gets the price to pay for setting the member fee
+     * 
+     * @return the price
+     */
+    public double geteMemberFeeSetPrice() {
+        return eMemberFeeSetPrice;
+    }
+    
+    /**
+     * Do leaders need to pay for setting the member fee?
+     * @return true if so
+     */
+    public boolean isePurchaseMemberFeeSet() {
+        return ePurchaseMemberFeeSet;
+    }
+
+    /**
+     * Gets the price to reset the KDR
+     * @return the price
+     */
+    public double geteResetKdr() {
+        return eResetKdr;
+    }
+    
     /**
      * Check whether a string has a disallowed color
      *
@@ -402,60 +710,6 @@ public final class SettingsManager {
     /**
      * Check whether a player is banned
      *
-     * @param playerName the player's name
-     * @return whether player is banned
-     */
-    @Deprecated
-    public boolean isBanned(String playerName) {
-        if (SimpleClans.getInstance().hasUUID()) {
-            playerName = UUIDMigration.getForcedPlayerUUID(playerName).toString();
-        }
-        for (String pl : getBannedPlayers()) {
-            if (pl.equalsIgnoreCase(playerName)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Add a player to the banned list
-     *
-     * @param playerName the player's name
-     */
-    @Deprecated
-    public void addBanned(String playerName) {
-        if (SimpleClans.getInstance().hasUUID()) {
-            playerName = UUIDMigration.getForcedPlayerUUID(playerName).toString();
-        }
-        if (!bannedPlayers.contains(playerName)) {
-            getBannedPlayers().add(playerName);
-        }
-
-        save();
-    }
-
-    /**
-     * Remove a player from the banned list
-     *
-     * @param playerName the player's name
-     */
-    @Deprecated
-    public void removeBanned(String playerName) {
-        if (SimpleClans.getInstance().hasUUID()) {
-            playerName = UUIDMigration.getForcedPlayerUUID(playerName).toString();
-        }
-        if (getBannedPlayers().contains(playerName)) {
-            getBannedPlayers().remove(playerName);
-        }
-
-        save();
-    }
-
-    /**
-     * Check whether a player is banned
-     *
      * @param playerUniqueId the player's name
      * @return whether player is banned
      */
@@ -476,9 +730,10 @@ public final class SettingsManager {
      */
     public void addBanned(UUID playerUniqueId) {
         if (!bannedPlayers.contains(playerUniqueId.toString())) {
-            getBannedPlayers().add(playerUniqueId.toString());
+            bannedPlayers.add(playerUniqueId.toString());
         }
-
+        
+        getConfig().set("settings.banned-players", bannedPlayers);
         save();
     }
 
@@ -488,10 +743,9 @@ public final class SettingsManager {
      * @param playerUniqueId the player's name
      */
     public void removeBanned(UUID playerUniqueId) {
-        if (getBannedPlayers().contains(playerUniqueId.toString())) {
-            getBannedPlayers().remove(playerUniqueId.toString());
-        }
-
+        bannedPlayers.remove(playerUniqueId.toString());
+        
+        getConfig().set("settings.banned-players", bannedPlayers);
         save();
     }
 
@@ -508,8 +762,48 @@ public final class SettingsManager {
     public boolean isRequireVerification() {
         return requireVerification;
     }
+    
+    public boolean isRejoinCooldown() {
+    	return rejoinCooldownEnabled;
+    }
+    
+    public int getRejoinCooldown() {
+    	return rejoinCooldown;
+    }
+    
+    public String getListDefault() {
+		return listDefault;
+	}
 
-    /**
+	public String getListSize() {
+		return listSize;
+	}
+
+	public String getListKdr() {
+		return listKdr;
+	}
+
+	public String getListName() {
+		return listName;
+	}
+
+	public String getListFounded() {
+		return listFounded;
+	}
+
+	public String getListActive() {
+		return listActive;
+	}
+
+	public String getListAsc() {
+		return listAsc;
+	}
+
+	public String getListDesc() {
+		return listDesc;
+	}
+
+	/**
      * @return the bannedPlayers
      */
     public List<String> getBannedPlayers() {
@@ -535,34 +829,6 @@ public final class SettingsManager {
      */
     public int getRivalLimitPercent() {
         return rivalLimitPercent;
-    }
-
-    /**
-     * @return the alertUrl
-     */
-    public String getAlertUrl() {
-        return alertUrl;
-    }
-
-    /**
-     * @return the inGameTags
-     */
-    public boolean isInGameTags() {
-        return inGameTags;
-    }
-
-    /**
-     * @return the clanCapes
-     */
-    public boolean isClanCapes() {
-        return clanCapes;
-    }
-
-    /**
-     * @return the defaultCapeUrl
-     */
-    public String getDefaultCapeUrl() {
-        return defaultCapeUrl;
     }
 
     /**
@@ -657,6 +923,13 @@ public final class SettingsManager {
     }
 
     /**
+     * @return the bbLoginSize
+     */
+    public int getBbLoginSize() {
+        return bbLoginSize;
+    }
+
+    /**
      * @return the bbColor
      */
     public String getBbColor() {
@@ -711,8 +984,32 @@ public final class SettingsManager {
     public int getClanMinSizeToRival() {
         return clanMinSizeToRival;
     }
+    
+    /**
+     * Returns the max length of the clan description
+     * 
+     * @return the max length
+     */
+    public int getClanMaxDescriptionLength() {
+    	if (clanMaxDescriptionLength > 255 || clanMaxDescriptionLength < 0) {
+    		clanMaxDescriptionLength = 255;
+    	}
+		return clanMaxDescriptionLength;
+	}
 
     /**
+     * Returns the min length of the clan description
+     * 
+     * @return the min length
+     */
+	public int getClanMinDescriptionLength() {
+		if (clanMinDescriptionLength < 0 || clanMinDescriptionLength > getClanMaxDescriptionLength()) {
+			clanMinDescriptionLength = 0;
+		}
+		return clanMinDescriptionLength;
+	}
+
+	/**
      * @return the clanMinLength
      */
     public int getClanMinLength() {
@@ -758,12 +1055,12 @@ public final class SettingsManager {
      * @return the tagSeparator
      */
     public String getTagSeparator() {
-        if (tagSeparator.equals(" .")) {
-            return ".";
-        }
-
         if (tagSeparator == null) {
             return "";
+        }
+
+        if (tagSeparator.equals(" .")) {
+            return ".";
         }
 
         return tagSeparator;
@@ -775,6 +1072,26 @@ public final class SettingsManager {
     public String getTagSeparatorColor() {
         return Helper.toColor(tagSeparatorColor);
     }
+    
+    public String getClanChatFormat() {
+        return clanChatFormat;
+    }
+    
+    public String getClanChatRank() {
+        return clanChatRank;
+    }
+    
+    public String getClanChatLeaderColor() {
+        return Helper.toColor(clanChatLeaderColor);
+    }
+    
+    public String getClanChatTrustedColor() {
+ 		return Helper.toColor(clanChatTrustedColor);
+ 	}
+    
+    public String getClanChatMemberColor() {
+        return Helper.toColor(clanChatMemberColor);
+    }
 
     /**
      * @return the clanChatAnnouncementColor
@@ -783,41 +1100,47 @@ public final class SettingsManager {
         return Helper.toColor(clanChatAnnouncementColor);
     }
 
+    @Deprecated
     /**
      * @return the clanChatMessageColor
      */
     public String getClanChatMessageColor() {
-        return Helper.toColor(clanChatMessageColor);
+        return clanChatMessageColor;
     }
 
+    @Deprecated
     /**
      * @return the clanChatNameColor
      */
     public String getClanChatNameColor() {
-        return Helper.toColor(clanChatNameColor);
+        return clanChatNameColor;
     }
-
+    
+    @Deprecated
     /**
      * @return the clanChatTagBracketLeft
      */
     public String getClanChatTagBracketLeft() {
-        return clanChatTagBracketLeft;
+        return clanChatTagBracketLeft == null ? "[" : clanChatTagBracketLeft;
     }
 
+    @Deprecated
     /**
      * @return the clanChatTagBracketRight
      */
     public String getClanChatTagBracketRight() {
-        return clanChatTagBracketRight;
+        return clanChatTagBracketRight == null ? "]" : clanChatTagBracketRight;
     }
 
+    @Deprecated
     /**
      * @return the clanChatBracketColor
      */
     public String getClanChatBracketColor() {
-        return Helper.toColor(clanChatBracketColor);
+        return clanChatBracketColor == null ? Helper.toColor("e") : clanChatBracketColor;
     }
 
+    @Deprecated
     /**
      * @return the clanChatPlayerBracketLeft
      */
@@ -825,6 +1148,7 @@ public final class SettingsManager {
         return clanChatPlayerBracketLeft;
     }
 
+    @Deprecated
     /**
      * @return the clanChatPlayerBracketRight
      */
@@ -893,13 +1217,6 @@ public final class SettingsManager {
      */
     public String getPassword() {
         return password;
-    }
-
-    /**
-     * @return the inGameTagsColored
-     */
-    public boolean isInGameTagsColored() {
-        return inGameTagsColored;
     }
 
     /**
@@ -1029,6 +1346,22 @@ public final class SettingsManager {
     public boolean isConfirmationForDemote() {
         return confirmationForDemote;
     }
+    
+    /**
+     * Returns the min percentage of leaders online required to demote someone
+     * 
+     * @return the percentage
+     */
+    public double getPercentageOnlineToDemote() {
+        if (percentageOnlineToDemote <= 0 || percentageOnlineToDemote > 100) {
+            percentageOnlineToDemote = 100;
+        }
+        return percentageOnlineToDemote;
+    }
+
+    public boolean isDenySameIPKills() {
+        return denySameIPKills;
+    }
 
     public boolean isUseColorCodeFromPrefix() {
         return useColorCodeFromPrefix;
@@ -1042,40 +1375,68 @@ public final class SettingsManager {
         return allyChatEnable;
     }
 
+    @Deprecated
     public String getAllyChatMessageColor() {
-        return Helper.toColor(allyChatMessageColor);
+        return allyChatMessageColor;
+    }
+    
+    public String getAllyChatFormat() {
+        return allyChatFormat;
+    }
+    
+    public String getAllyChatRank() {
+        return allyChatRank;
+    }
+    
+    public String getAllyChatLeaderColor() {
+        return Helper.toColor(allyChatLeaderColor);
+    }
+    
+    public String getAllyChatTrustedColor() {
+		return Helper.toColor(allyChatTrustedColor);
+	}
+    
+    public String getAllyChatMemberColor() {
+        return Helper.toColor(allyChatMemberColor);
     }
 
+    @Deprecated
     public String getAllyChatNameColor() {
-        return Helper.toColor(allyChatNameColor);
+        return allyChatNameColor;
     }
 
+    @Deprecated
     public String getAllyChatTagBracketLeft() {
         return allyChatTagBracketLeft;
     }
 
+    @Deprecated
     public String getAllyChatTagBracketRight() {
         return allyChatTagBracketRight;
     }
 
+    @Deprecated
     public String getAllyChatBracketColor() {
-        return Helper.toColor(allyChatBracketColor);
+        return allyChatBracketColor;
     }
 
+    @Deprecated
     public String getAllyChatPlayerBracketLeft() {
         return allyChatPlayerBracketLeft;
     }
 
+    @Deprecated
     public String getAllyChatPlayerBracketRight() {
         return allyChatPlayerBracketRight;
     }
-
+    
     public String getCommandGlobal() {
         return commandGlobal;
     }
 
+    @Deprecated
     public String getAllyChatTagColor() {
-        return Helper.toColor(allyChatTagColor);
+        return allyChatTagColor;
     }
 
     public boolean isClanFFOnByDefault() {
@@ -1148,12 +1509,41 @@ public final class SettingsManager {
     public boolean isePurchaseHomeTeleport() {
         return ePurchaseHomeTeleport;
     }
+    
+    /**
+     * @return the eUniqueTaxOnRegroup
+     */
+    public boolean iseUniqueTaxOnRegroup() {
+        return eUniqueTaxOnRegroup;
+    }
+
+    /**
+     * 
+     * @return the eIssuerPaysRegroup
+     */
+    public boolean iseIssuerPaysRegroup() {
+        return eIssuerPaysRegroup;
+    }
+    
+    /**
+     * @return the ePurchaseHomeRegroup
+     */
+    public boolean isePurchaseHomeRegroup() {
+        return ePurchaseHomeRegroup;
+    }
 
     /**
      * @return the HomeTeleportPrice
      */
     public double getHomeTeleportPrice() {
         return eHomeTeleportPrice;
+    }
+    
+    /**
+     * @return the HomeRegroupPrice
+     */
+    public double getHomeRegroupPrice() {
+        return eHomeRegroupPrice;
     }
 
     /**
@@ -1212,8 +1602,9 @@ public final class SettingsManager {
         return tamableMobsSharing;
     }
 
+    @Deprecated
     public boolean isOnlineMode() {
-        return onlineMode;
+        return true;
     }
 
     public boolean isDisableMessages() {
@@ -1268,4 +1659,21 @@ public final class SettingsManager {
     public int getMaxMembers() {
         return this.maxMembers;
     }
+
+	public boolean isSavePeriodically() {
+		return savePeriodically;
+	}
+
+	/**
+	 * Gets the interval to save the data
+	 * 
+	 * @return the interval in seconds
+	 */
+	public int getSaveInterval() {
+		if (saveInterval < 1) {
+			saveInterval = 5;
+		}
+		
+		return saveInterval * 60;
+	}
 }

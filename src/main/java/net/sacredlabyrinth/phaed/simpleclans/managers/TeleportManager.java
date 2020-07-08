@@ -36,17 +36,13 @@ public final class TeleportManager {
      * @param clanName
      */
     public void addPlayer(Player player, Location dest, String clanName) {
-        int secs = SimpleClans.getInstance().getSettingsManager().getWaitSecs();
+		int secs = SimpleClans.getInstance().getSettingsManager().getWaitSecs();
+		waitingPlayers.put(player.getUniqueId().toString(), new TeleportState(player, dest, clanName));
 
-        if (SimpleClans.getInstance().hasUUID()) {
-            waitingPlayers.put(player.getUniqueId().toString(), new TeleportState(player, dest, clanName));
-        } else {
-            waitingPlayers.put(player.getName(), new TeleportState(player, dest, clanName));
-        }
-
-        if (secs > 0) {
-            ChatBlock.sendMessage(player, ChatColor.AQUA + MessageFormat.format(plugin.getLang("waiting.for.teleport.stand.still.for.0.seconds"), secs));
-        }
+		if (secs > 0) {
+			ChatBlock.sendMessage(player, ChatColor.AQUA
+					+ MessageFormat.format(plugin.getLang("waiting.for.teleport.stand.still.for.0.seconds"), secs));
+		}
     }
 
     private void dropItems(Player player) {
@@ -61,7 +57,7 @@ public final class TeleportManager {
 
                 List<Integer> itemsList = plugin.getSettingsManager().getItemsList();
 
-                if (itemsList.contains(item.getTypeId())) {
+                if (itemsList.contains(item.getType().getId())) {
                     player.getWorld().dropItemNaturally(player.getLocation(), item);
                     inv.remove(item);
                 }
@@ -78,7 +74,7 @@ public final class TeleportManager {
 
                     List<Integer> itemsList = plugin.getSettingsManager().getItemsList();
 
-                    if (!itemsList.contains(item.getTypeId())) {
+                    if (!itemsList.contains(item.getType().getId())) {
                         player.getWorld().dropItemNaturally(player.getLocation(), item);
                         inv.remove(item);
                     }

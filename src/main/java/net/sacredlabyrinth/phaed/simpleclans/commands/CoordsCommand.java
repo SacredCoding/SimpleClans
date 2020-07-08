@@ -47,10 +47,10 @@ public class CoordsCommand {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("clan.is.not.verified"));
             return;
         }
-        if (!cp.isTrusted()) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("only.trusted.players.can.access.clan.coords"));
-            return;
+        if (!plugin.getPermissionsManager().has(player, RankPermission.COORDS, PermissionLevel.TRUSTED, true)) {
+        	return;
         }
+
         if (arg.length != 0) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.0.coords"), plugin.getSettingsManager().getCommandClan()));
             return;
@@ -96,7 +96,7 @@ public class CoordsCommand {
         }
 
         ChatBlock.sendBlank(player);
-        ChatBlock.saySingle(player, plugin.getSettingsManager().getPageClanNameColor() + Helper.capitalize(clan.getName()) + subColor + " " + plugin.getLang("coords") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
+        ChatBlock.saySingle(player, plugin.getSettingsManager().getPageClanNameColor() + clan.getName() + subColor + " " + plugin.getLang("coords") + " " + headColor + Helper.generatePageSeparator(plugin.getSettingsManager().getPageSep()));
         ChatBlock.sendBlank(player);
 
         boolean more = chatBlock.sendBlock(player, plugin.getSettingsManager().getPageSize());

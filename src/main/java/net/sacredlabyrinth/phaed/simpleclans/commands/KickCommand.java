@@ -4,11 +4,14 @@ import net.sacredlabyrinth.phaed.simpleclans.ChatBlock;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.Helper;
+import net.sacredlabyrinth.phaed.simpleclans.PermissionLevel;
+import net.sacredlabyrinth.phaed.simpleclans.RankPermission;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import java.text.MessageFormat;
+import java.util.UUID;
 
 import net.sacredlabyrinth.phaed.simpleclans.uuid.UUIDMigration;
 
@@ -42,22 +45,21 @@ public class KickCommand {
 
         Clan clan = cp.getClan();
 
-        if (!clan.isLeader(player)) {
-            ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.leader.permissions"));
-            return;
+        if (!plugin.getPermissionsManager().has(player, RankPermission.KICK, PermissionLevel.LEADER, true)) {
+        	return;
         }
+
         if (arg.length != 1) {
             ChatBlock.sendMessage(player, ChatColor.RED + MessageFormat.format(plugin.getLang("usage.kick.player"), plugin.getSettingsManager().getCommandClan()));
             return;
         }
 
-        String kicked = arg[0];
-
+        UUID kicked = UUIDMigration.getForcedPlayerUUID(arg[0]);
         if (kicked == null) {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("no.player.matched"));
             return;
         }
-        if (kicked.equalsIgnoreCase(player.getName())) {
+        if (kicked.equals(player.getUniqueId())) {
             ChatBlock.sendMessage(player, ChatColor.RED + plugin.getLang("you.cannot.kick.yourself"));
             return;
         }
@@ -70,12 +72,7 @@ public class KickCommand {
             return;
         }
 
-        clan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("has.been.kicked.by"), Helper.capitalize(kicked), player.getName()));
-
-        if (SimpleClans.getInstance().hasUUID()) {
-            clan.removePlayerFromClan(UUIDMigration.getForcedPlayerUUID(kicked));
-        } else {
-            clan.removePlayerFromClan(kicked);
-        }
+        clan.addBb(player.getName(), ChatColor.AQUA + MessageFormat.format(plugin.getLang("has.been.kicked.by"), arg[0], player.getName()));
+        clan.removePlayerFromClan(kicked);
     }
 }

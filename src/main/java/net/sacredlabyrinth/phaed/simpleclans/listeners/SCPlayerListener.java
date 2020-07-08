@@ -13,11 +13,13 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 
 import java.util.Iterator;
+import net.sacredlabyrinth.phaed.simpleclans.ChatBlock;
 
 /**
  * @author phaed
  */
 public class SCPlayerListener implements Listener {
+
     private SimpleClans plugin;
 
     /**
@@ -71,13 +73,17 @@ public class SCPlayerListener implements Listener {
 
             if (cp.getTag().equalsIgnoreCase(command)) {
                 event.setCancelled(true);
+                if (!plugin.getPermissionsManager().has(cp.toPlayer(), "simpleclans.member.chat")) {
+                    ChatBlock.sendMessage(cp.toPlayer(), ChatColor.RED + plugin.getLang("insufficient.permissions"));
+                    return;
+                }
 
                 if (split.length > 1) {
                     plugin.getClanManager().processClanChat(player, cp.getTag(), Helper.toMessage(Helper.removeFirst(split)));
                 }
             }
         }
-        if (command.equals(".")) {
+        if (command.equalsIgnoreCase(plugin.getSettingsManager().getCommandClanChat())) {
             if (!plugin.getSettingsManager().getClanChatEnable()) {
                 return;
             }
@@ -90,6 +96,10 @@ public class SCPlayerListener implements Listener {
 
             event.setCancelled(true);
 
+            if (!plugin.getPermissionsManager().has(cp.toPlayer(), "simpleclans.member.chat")) {
+                ChatBlock.sendMessage(cp.toPlayer(), ChatColor.RED + plugin.getLang("insufficient.permissions"));
+                return;
+            }
             if (split.length > 1) {
                 plugin.getClanManager().processClanChat(player, cp.getTag(), Helper.toMessage(Helper.removeFirst(split)));
             }
@@ -146,13 +156,23 @@ public class SCPlayerListener implements Listener {
         String message = event.getMessage();
         ClanPlayer cp = plugin.getClanManager().getClanPlayer(event.getPlayer());
 
-        if (cp != null) {
+        if (cp != null && !event.isCancelled()) {
             if (cp.getChannel().equals(ClanPlayer.Channel.CLAN)) {
+                event.setCancelled(true);
+                if (!plugin.getPermissionsManager().has(cp.toPlayer(), "simpleclans.member.chat")) {
+                    ChatBlock.sendMessage(cp.toPlayer(), ChatColor.RED + plugin.getLang("insufficient.permissions"));
+                    return;
+                }
+
                 plugin.getClanManager().processClanChat(event.getPlayer(), message);
-                event.setCancelled(true);
             } else if (cp.getChannel().equals(ClanPlayer.Channel.ALLY)) {
-                plugin.getClanManager().processAllyChat(event.getPlayer(), message);
                 event.setCancelled(true);
+                if (!plugin.getPermissionsManager().has(cp.toPlayer(), "simpleclans.member.ally")) {
+                    ChatBlock.sendMessage(cp.toPlayer(), ChatColor.RED + plugin.getLang("insufficient.permissions"));
+                    return;
+                }
+
+                plugin.getClanManager().processAllyChat(event.getPlayer(), message);
             }
         }
 
@@ -160,8 +180,8 @@ public class SCPlayerListener implements Listener {
             boolean isClanChat = event.getMessage().contains("" + ChatColor.RED + ChatColor.WHITE + ChatColor.RED + ChatColor.BLACK);
             boolean isAllyChat = event.getMessage().contains("" + ChatColor.AQUA + ChatColor.WHITE + ChatColor.AQUA + ChatColor.BLACK);
 
-            for (Iterator iter = event.getRecipients().iterator(); iter.hasNext(); ) {
-                Player player = (Player) iter.next();
+            for (Iterator<Player> iter = event.getRecipients().iterator(); iter.hasNext();) {
+                Player player = iter.next();
 
                 ClanPlayer rcp = plugin.getClanManager().getClanPlayer(player);
 
@@ -235,15 +255,10 @@ public class SCPlayerListener implements Listener {
         }
         cp.setName(player.getName());
 
-        if (SimpleClans.getInstance().hasUUID()) {
-            SimpleClans.getInstance().getSpoutPluginManager().processPlayer(cp.getUniqueId());
-        } else {
-            SimpleClans.getInstance().getSpoutPluginManager().processPlayer(cp.getName());
-        }
         SimpleClans.getInstance().getPermissionsManager().addPlayerPermissions(cp);
 
         if (plugin.getSettingsManager().isBbShowOnLogin() && cp.isBbEnabled()) {
-            cp.getClan().displayBb(player);
+            cp.getClan().displayBb(player, plugin.getSettingsManager().getBbLoginSize());
         }
 
         SimpleClans.getInstance().getPermissionsManager().addClanPermissions(cp);
@@ -305,29 +320,5 @@ public class SCPlayerListener implements Listener {
         }
 
         plugin.getClanManager().updateLastSeen(event.getPlayer());
-    }
-
-    /**
-     * @param event
-     */
-    @EventHandler
-    public void onPlayerTeleport(PlayerTeleportEvent event) {
-        if (event.isCancelled()) {
-            return;
-        }
-
-        if (plugin.getSettingsManager().isBlacklistedWorld(event.getPlayer().getLocation().getWorld().getName())) {
-            return;
-        }
-
-        plugin.getSpoutPluginManager().processPlayer(event.getPlayer());
-    }
-
-    /**
-     * @param event
-     */
-    @EventHandler
-    public void onPlayerToggleSneak(PlayerToggleSneakEvent event) {
-        plugin.getSpoutPluginManager().processPlayer(event.getPlayer());
     }
 }
