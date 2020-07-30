@@ -1,15 +1,15 @@
 package net.sacredlabyrinth.phaed.simpleclans.managers;
 
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-
 import me.clip.placeholderapi.PlaceholderAPI;
-import me.clip.placeholderapi.PlaceholderHook;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
+
+import org.bukkit.OfflinePlayer;
+import org.bukkit.plugin.Plugin;
 
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,9 +26,10 @@ import static me.clip.placeholderapi.PlaceholderAPIPlugin.booleanTrue;
  * @author Peng1104
  */
 
-public final class PlaceholdersManager {
+public final class PlaceholdersManager extends PlaceholderExpansion {
 
 	private static final String TOP_CLANS_IDENTIFIER = "topclans_";
+	private final String version = this.getClass().getPackage().getImplementationVersion();
 	
 	/**
 	 * The {@link SimpleClans} {@link Plugin} instance
@@ -46,7 +47,7 @@ public final class PlaceholdersManager {
 	
 	public PlaceholdersManager(SimpleClans plugin) {
 		this.plugin = plugin;
-		setupPlaceholderAPI();
+		this.register();
 	}
 	
 	/**
@@ -54,26 +55,44 @@ public final class PlaceholdersManager {
 	 * 
 	 * @since 2.10.1
 	 */
-	
-	private void setupPlaceholderAPI() {
-		PlaceholderAPI.registerPlaceholderHook(plugin.getName(), new PlaceholderHook() {
 
-			@Override
-			public String onPlaceholderRequest(Player player, String identifier) {
-				return onRequest(player, identifier);
-			}
-			
-			@Override
-			public String onRequest(OfflinePlayer player, String identifier) {
-				ClanPlayer clanPlayer = null;
-				if (player != null) {
-					clanPlayer = plugin.getClanManager().getAnyClanPlayer(player.getUniqueId());
-				}
-				return getPlaceholderValue(clanPlayer, identifier);
-			}
-		});
+	@Override
+	public boolean persist(){
+		return true;
 	}
-	
+
+	@Override
+	public boolean canRegister() {
+		return true;
+	}
+
+	@Override
+	@NotNull
+	public String getAuthor() {
+		return "marcelo-mason";
+	}
+
+	@Override
+	@NotNull
+	public String getIdentifier() {
+		return "simpleclans";
+	}
+
+	@Override
+	@NotNull
+	public String getVersion() {
+		return this.version;
+	}
+
+	@Override
+	public String onRequest(OfflinePlayer p, @NotNull String identifier) {
+		ClanPlayer clanPlayer = null;
+		if (p != null) {
+			clanPlayer = plugin.getClanManager().getAnyClanPlayer(p.getUniqueId());
+		}
+		return clanPlayer != null ? getPlaceholderValue(clanPlayer, identifier) : "";
+	}
+
 	/**
 	 * Gets a value for the requested {@link ClanPlayer} and identifier
 	 * 
